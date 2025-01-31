@@ -25,7 +25,7 @@ function Milankovich_EOM(
     models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
 ) where {N}
     Hx, Hy, Hz, _, _, _, _ = u
-    μ = p.μ
+    μ::Number = p.μ
 
     u_cart = AstroCoords.Mil2cart(u, μ)
 

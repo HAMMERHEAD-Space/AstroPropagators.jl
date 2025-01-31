@@ -25,7 +25,7 @@ function GaussVE_EOM(
     models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
 ) where {N}
     a, e, i, _, ω, f = u
-    μ = ps.μ
+    μ::Number = ps.μ
 
     u_cart = Cartesian(Keplerian(u), μ)
     acc =

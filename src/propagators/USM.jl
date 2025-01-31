@@ -26,7 +26,7 @@ function USM7_EOM(
 ) where {N}
     C, Rf1, Rf2, ϵO1, ϵO2, ϵO3, η0 = u
 
-    μ = p.μ
+    μ::Number = p.μ
 
     sinλ = (2 * ϵO3 * η0) / (ϵO3^2 + η0^2)
     cosλ = (η0^2 - ϵO3^2) / (ϵO3^2 + η0^2)
@@ -40,21 +40,19 @@ function USM7_EOM(
     fe =
         RTN_frame(u_cart) * (
             build_dynamics_model(u_cart, p, t, models) -
-            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=p.μ))
+            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
         )
 
     ω1 = fe[3] / ve2
 
     return SVector{7}(
-        [
-            -ρ * fe[2]
-            fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2)
-            fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2)
-            0.5 * (ω3 * ϵO2 + ω1 * η0)
-            0.5 * (-ω3 * ϵO1 + ω1 * ϵO3)
-            0.5 * (-ω1 * ϵO2 + ω3 * η0)
-            0.5 * (-ω1 * ϵO1 - ω3 * ϵO3)
-        ],
+            -ρ * fe[2],
+            fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2),
+            fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2),
+            0.5 * (ω3 * ϵO2 + ω1 * η0),
+            0.5 * (-ω3 * ϵO1 + ω1 * ϵO3),
+            0.5 * (-ω1 * ϵO2 + ω3 * η0),
+            0.5 * (-ω1 * ϵO1 - ω3 * ϵO3),
     )
 end
 
@@ -122,11 +120,11 @@ function USM6_EOM(
 
     #TODO: SHADOW SET SHOULD PROBABLY BE EVENT
     if σ_norm > 1.0
-        u[4:6] .= -u[4:6] / σ_norm
+        u[4:6] .= -σ ./ σ_norm
     end
 
     C, Rf1, Rf2, σ1, σ2, σ3 = u
-    μ = p.μ
+    μ::Number = p.μ
 
     σ = SVector{3}(u[4], u[5], u[6])
     σ_norm = √(sum(abs2.(σ)))
@@ -153,14 +151,14 @@ function USM6_EOM(
 
     ω1 = fe[3] / ve2
 
-    dC = -ρ * fe[2]
-    dRf1 = fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2)
-    dRf2 = fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2)
-    dσ1 = 0.25 * ((1.0 - σ_norm^2 + 2.0 * σ1^2) * ω1 + 2.0 * (σ1 * σ3 + σ2) * ω3)
-    dσ2 = 0.25 * (2.0 * (σ2 * σ1 + σ3) * ω1 + 2.0 * (σ2 * σ3 - σ1) * ω3)
-    dσ3 = 0.25 * (2.0 * (σ3 * σ1 - σ2) * ω1 + (1.0 - σ_norm^2 + 2.0 * σ3^2) * ω3)
-
-    return SVector{6}(dC, dRf1, dRf2, dσ1, dσ2, dσ3)
+    return SVector{6}(
+        -ρ * fe[2],
+        fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2),
+        fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2),
+        0.25 * ((1.0 - σ_norm^2 + 2.0 * σ1^2) * ω1 + 2.0 * (σ1 * σ3 + σ2) * ω3),
+        0.25 * (2.0 * (σ2 * σ1 + σ3) * ω1 + 2.0 * (σ2 * σ3 - σ1) * ω3),
+        0.25 * (2.0 * (σ3 * σ1 - σ2) * ω1 + (1.0 - σ_norm^2 + 2.0 * σ3^2) * ω3),
+    )
 end
 
 """
@@ -232,7 +230,7 @@ function USMEM_EOM(
     Φ = √(sum(abs2.(a)))
     a_cross = skew_sym(a)
 
-    μ = p.μ
+    μ::Number = p.μ
 
     (_, _, _, ϵO1, ϵO2, ϵO3, η0) = USM7(USMEM(u), μ)
     u_cart = Cartesian(USMEM(u), μ)
@@ -247,7 +245,7 @@ function USMEM_EOM(
     fe =
         RTN_frame(u_cart) * (
             build_dynamics_model(u_cart, p, t, models) -
-            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=p.μ))
+            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
         )
 
     ω1 = fe[3] / ve2
@@ -257,16 +255,19 @@ function USMEM_EOM(
     dC = -ρ * fe[2]
     dRf1 = fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2)
     dRf2 = fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2)
+    
+
+    
     if Φ > Φ_tol
         da =
-            (
-                I(3) +
+            (    
+                SMatrix{3,3}(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0) +
                 a_cross / 2.0 +
                 1.0 / (Φ^2.0) * (1.0 - Φ / 2.0 * cot(Φ / 2.0)) * a_cross * a_cross
             ) * ω
     else
         da =
-            0.5 * (
+            0.5 .* (
                 (12.0 - Φ^2.0) / 6.0 * ω - cross(ω, a) -
                 dot(ω, a) * ((60.0 + Φ^2.0) / 360.0) * a
             )

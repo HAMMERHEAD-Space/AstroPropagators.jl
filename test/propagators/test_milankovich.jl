@@ -56,10 +56,10 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.2)
-    srp_model = SRPAstroModel(satellite_srp_model, sun_third_body, eop_data, Conical())
+    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(satellite_drag_model, JB2008(), eop_data)
+    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
 
     u0 = [
         -1076.225324679696
@@ -82,12 +82,12 @@ end
 
     # Comparison Against Cowell
     expected_end = [
-        29212.62374256986
-        22212.76353663187
-        -1540.6511103523974
-        0.021438031925788435
-        2.3052533789977283
-        0.15096291364452943
+        29245.74497253034
+        22127.193058906043
+        -1549.7695621180876
+        0.03440754290088714
+        2.3126076757200003
+        0.1501127574349222
     ]
     @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
 end
@@ -110,10 +110,10 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.5)
-    srp_model = SRPAstroModel(satellite_srp_model, sun_third_body, eop_data, Conical())
+    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(satellite_drag_model, JB2008(), eop_data)
+    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
 
     u0 = [
         -1076.225324679696
@@ -137,12 +137,12 @@ end
 
     # Comparison Against Cowell
     expected_end = [
-        -6784.9921776875735
-        -1799.304269908728
-        577.7813575312992
-        4.235672199681506
-        -8.073913231493453
-        -1.023142249002948
+        -8372.895299659556
+        5579.539458768319
+        1276.7499246213724
+        -0.41955615768671234
+        -7.385062119946734
+        -0.4797259172503372
     ]
     @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
 end

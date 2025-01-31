@@ -16,17 +16,17 @@ struct USM6Propagator <: AbstractPropType end
 struct USMEMPropagator <: AbstractPropType end
 
 function propagate(
-    u0::AbstractArray,
+    u0::AbstractArray{UT},
     p::ComponentArray,
     models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    tspan::Tuple{Number,Number};
+    tspan::Tuple{TT,TT};
     prop_type::AbstractPropType=CowellPropagator(),
     tsteps::Union{Vector{<:AbstractFloat},Nothing}=nothing,
     ODE_solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=VCABM(),
     abstol::Float64=1E-13,
     reltol::Float64=1E-13,
     output_file::Union{String,Nothing}=nothing,
-) where {N}
+) where {N, UT<:Number, TT<:Number}
 
     #TODO: DO THIS MORE INTELLIGENTLY
     EOM!(du, u, p, t) =
@@ -44,7 +44,7 @@ function propagate(
             USMEM_EOM!(du, u, p, t, models)
         end
 
-    ODE_prob = ODEProblem{true}(EOM!, u0, tspan, p)
+    ODE_prob::ODEProblem{UT,TT,true} = ODEProblem{true}(EOM!, u0, tspan, p)
 
     sol = solve(ODE_prob, ODE_solver; reltol=reltol, abstol=abstol)
 
