@@ -57,10 +57,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.2)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696
@@ -111,10 +120,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.5)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696
@@ -207,10 +225,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.2)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696
@@ -262,10 +289,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.5)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696
@@ -358,10 +394,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.2)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696
@@ -413,10 +458,19 @@ end
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
     satellite_srp_model = CannonballFixedSRP(0.5)
-    srp_model = SRPAstroModel(; satellite_srp_model=satellite_srp_model, sun_data=sun_third_body, eop_data=eop_data, shadow_model=Conical())
+    srp_model = SRPAstroModel(;
+        satellite_srp_model=satellite_srp_model,
+        sun_data=sun_third_body,
+        eop_data=eop_data,
+        shadow_model=Conical(),
+    )
 
     satellite_drag_model = CannonballFixedDrag(0.2)
-    drag_model = DragAstroModel(;satellite_drag_model=satellite_drag_model, atmosphere_model=JB2008(), eop_data=eop_data)
+    drag_model = DragAstroModel(;
+        satellite_drag_model=satellite_drag_model,
+        atmosphere_model=JB2008(),
+        eop_data=eop_data,
+    )
 
     u0 = [
         -1076.225324679696

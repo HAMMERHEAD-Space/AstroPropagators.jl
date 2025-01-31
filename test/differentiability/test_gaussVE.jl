@@ -5,24 +5,22 @@
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> GaussVE_EOM(x, _p2, _t, _model_list),
-                    AutoFiniteDiff(),
-                    Array(_state_koe),
+                AutoFiniteDiff(),
+                Array(_state_koe),
             )
 
             f_ad, df_ad = value_and_jacobian(
                 (x) -> Array(GaussVE_EOM(x, _p2, _t, _model_list)),
-                    backend[2],
-                    Array(_state_koe),
+                backend[2],
+                Array(_state_koe),
             )
-    
-    
+
             @test f_fd ≈ f_ad
             @test df_fd ≈ df_ad atol = 1e-5
         end
     end
     SpaceIndices.destroy()
 end
-
 
 @testset "Gauss VE Time Differntiability" begin
     SpaceIndices.init()
@@ -31,21 +29,19 @@ end
         @testset "$testname" begin
             f_fd, df_fd = value_and_derivative(
                 (x) -> GaussVE_EOM(Array(_state_koe), _p2, x, _model_list),
-                    AutoFiniteDiff(),
-                    _t,
+                AutoFiniteDiff(),
+                _t,
             )
 
             f_ad, df_ad = value_and_derivative(
                 (x) -> Array(GaussVE_EOM(Array(_state_koe), _p2, x, _model_list)),
-                    backend[2],
-                    _t,
+                backend[2],
+                _t,
             )
-    
-    
+
             @test f_fd ≈ f_ad
             @test df_fd ≈ df_ad atol = 1e-5
         end
     end
     SpaceIndices.destroy()
 end
-

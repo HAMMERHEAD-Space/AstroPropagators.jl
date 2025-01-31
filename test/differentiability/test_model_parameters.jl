@@ -59,4 +59,6 @@ const _moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=_eop_data)
 
 const _model_list = (_grav_model, _sun_model, _moon_model, _srp_model, _drag_model)
 
-const _p2 = ComponentVector(; JD=_JD, μ=GravityModels.gravity_constant(_grav_model.gravity_model) / 1E9)
+const _p2 = ComponentVector(;
+    JD=_JD, μ=GravityModels.gravity_constant(_grav_model.gravity_model) / 1E9
+)

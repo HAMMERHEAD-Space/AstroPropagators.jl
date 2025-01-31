@@ -26,7 +26,7 @@ function propagate(
     abstol::Float64=1E-13,
     reltol::Float64=1E-13,
     output_file::Union{String,Nothing}=nothing,
-) where {N, UT<:Number, TT<:Number}
+) where {N,UT<:Number,TT<:Number}
 
     #TODO: DO THIS MORE INTELLIGENTLY
     EOM!(du, u, p, t) =
