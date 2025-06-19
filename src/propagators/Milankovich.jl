@@ -4,8 +4,8 @@ export Milankovich_EOM, Milankovich_EOM!
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Milankovich propagation schema for orbital trajectories
 
@@ -13,17 +13,14 @@ Arguments:
 -`u::AbstractVector`: The current Milankovich state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 -`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
 """
 function Milankovich_EOM(
-    u::AbstractVector,
-    p::ComponentVector,
-    t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
+)
     Hx, Hy, Hz, _, _, _, _ = u
     μ::Number = p.μ
 
@@ -54,8 +51,8 @@ end
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Milankovich propagation schema for orbital trajectories
 
@@ -64,7 +61,7 @@ Arguments:
 -`u::AbstractVector`: The current Milankovich state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 - `nothing`
@@ -74,8 +71,8 @@ function Milankovich_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     du .= Milankovich_EOM(u, p, t, models)
 
     return nothing

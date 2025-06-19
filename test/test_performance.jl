@@ -43,7 +43,7 @@ end
         eop_data=eop_data,
     )
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(grav_model, (sun_third_body, moon_third_body, srp_model, drag_model))
 
     @test length(
         check_allocs(GaussVE_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))

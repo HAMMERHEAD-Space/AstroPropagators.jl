@@ -13,7 +13,7 @@
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     EOM!(du, u, p, t) = Cowell_EOM!(du, u, p, t, model_list)
@@ -75,7 +75,9 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 86400.0)
 
@@ -134,7 +136,9 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 3 * 86400.0)
 

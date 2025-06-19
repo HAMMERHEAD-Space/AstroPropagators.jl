@@ -4,8 +4,8 @@ export USM7_EOM, USM7_EOM!
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (quaternions) propagation schema for orbital trajectories
 
@@ -13,17 +13,14 @@ Arguments:
 -`u::AbstractVector`: The current USM7 state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 -`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
 """
 function USM7_EOM(
-    u::AbstractVector,
-    p::ComponentVector,
-    t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
+)
     C, Rf1, Rf2, ϵO1, ϵO2, ϵO3, η0 = u
 
     μ::Number = p.μ
@@ -62,8 +59,8 @@ end
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (quaternions) propagation schema for orbital trajectories
 
@@ -72,7 +69,7 @@ Arguments:
 -`u::AbstractVector`: The current USM7 state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 - `nothing`
@@ -82,8 +79,8 @@ function USM7_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     du .= USM7_EOM(u, p, t, models)
 
     return nothing
@@ -95,8 +92,8 @@ export USM6_EOM, USM6_EOM!
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (MRP's) propagation schema for orbital trajectories
 
@@ -104,30 +101,19 @@ Arguments:
 -`u::AbstractVector`: The current USM6 state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 -`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
 """
 function USM6_EOM(
-    u::AbstractVector,
-    p::ComponentVector,
-    t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
+)
     σ = SVector{3}(u[4], u[5], u[6])
     σ_norm = √(sum(abs2.(σ)))
-
-    #TODO: SHADOW SET SHOULD PROBABLY BE EVENT
-    if σ_norm > 1.0
-        u[4:6] .= -σ ./ σ_norm
-    end
 
     C, Rf1, Rf2, σ1, σ2, σ3 = u
     μ::Number = p.μ
-
-    σ = SVector{3}(u[4], u[5], u[6])
-    σ_norm = √(sum(abs2.(σ)))
 
     _, _, _, ϵO1, ϵO2, ϵO3, η0 = USM7(USM6(u), μ)
     u_cart = Cartesian(USM6(u), μ)
@@ -167,8 +153,8 @@ end
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (MRP's) propagation schema for orbital trajectories
 
@@ -177,7 +163,7 @@ Arguments:
 -`u::AbstractVector`: The current USM6 state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 Returns:
 - `nothing`
@@ -187,8 +173,8 @@ function USM6_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     du .= USM6_EOM(u, p, t, models)
 
     return nothing
@@ -200,8 +186,8 @@ export USMEM_EOM, USMEM_EOM!
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (exponential mapping) propagation schema for orbital trajectories
 
@@ -209,7 +195,7 @@ Arguments:
 -`u::AbstractVector`: The current USMEM state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 # Keyword Arguments"
 -`Φ_tol::Float64`: The value to switch to the Taylor series expansion to avoid singularity.
@@ -221,9 +207,9 @@ function USMEM_EOM(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel};
+    models::AbstractDynamicsModel;
     Φ_tol::Float64=1E-8,
-) where {N}
+)
     C, Rf1, Rf2, a1, a2, a3 = u
 
     a = SVector{3}(a1, a2, a3)
@@ -280,8 +266,8 @@ end
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Unified State Model (exponential mapping) propagation schema for orbital trajectories
 
@@ -290,7 +276,7 @@ Arguments:
 -`u::AbstractVector`: The current USM7 state.
 -`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
 -`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
 
 # Keyword Arguments"
 -`Φ_tol::Float64`: The value to switch to the Taylor series expansion to avoid singularity.
@@ -303,9 +289,9 @@ function USMEM_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel};
+    models::AbstractDynamicsModel;
     Φ_tol::Float64=1E-8,
-) where {N}
+)
     du .= USMEM_EOM(u, p, t, models; Φ_tol=Φ_tol)
 
     return nothing

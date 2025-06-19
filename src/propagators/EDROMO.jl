@@ -3,8 +3,8 @@ function EDROMO_ODE!(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     ζ1, ζ2, ζ3, ζ4, ζ5, ζ6, ζ7, ζ8 = u
 
     ##################################################

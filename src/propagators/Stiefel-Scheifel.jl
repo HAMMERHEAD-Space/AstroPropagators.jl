@@ -5,8 +5,8 @@ function STI_SCHE_ODE(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
-    models::NTuple{N,AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
 
     ##################################################
     #* 1. Auxiliary Quantities (1)
@@ -112,8 +112,8 @@ function STI_SCHE_ODE!(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
 
     ##################################################
     #* 1. Auxiliary Quantities (1)

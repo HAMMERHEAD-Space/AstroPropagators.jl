@@ -4,7 +4,7 @@ using AstroPropagators
 makedocs(;
     modules=[AstroPropagators],
     format=Documenter.HTML(;
-        prettyurls=!("local" in ARGS), highlights=["yaml"], ansicolor=true
+        prettyurls=(!("local" in ARGS)), highlights=["yaml"], ansicolor=true
     ),
     sitename="AstroPropagators.jl",
     authors="Jordan Murphy",

@@ -12,11 +12,11 @@ const _state = [
 ] #km, km/s
 
 const _μ = 398600.4418
-const _state_koe = Keplerian(Cartesian(_state), _μ)
-const _state_mil = Milankovich(Cartesian(_state), _μ)
-const _state_usm7 = USM7(Cartesian(_state), _μ)
-const _state_usm6 = USM6(Cartesian(_state), _μ)
-const _state_usmem = USMEM(Cartesian(_state), _μ)
+const _state_koe = Array(Keplerian(Cartesian(_state), _μ))
+const _state_mil = Array(Milankovich(Cartesian(_state), _μ))
+const _state_usm7 = Array(USM7(Cartesian(_state), _μ))
+const _state_usm6 = Array(USM6(Cartesian(_state), _μ))
+const _state_usmem = Array(USMEM(Cartesian(_state), _μ))
 
 const _eop_data = fetch_iers_eop()
 const _grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
@@ -57,7 +57,9 @@ const _RC = 0.2
 
 const _moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=_eop_data)
 
-const _model_list = (_grav_model, _sun_model, _moon_model, _srp_model, _drag_model)
+const _model_list = CentralBodyDynamicsModel(
+    _grav_model, (_sun_model, _moon_model, _srp_model, _drag_model)
+)
 
 const _p2 = ComponentVector(;
     JD=_JD, μ=GravityModels.gravity_constant(_grav_model.gravity_model) / 1E9

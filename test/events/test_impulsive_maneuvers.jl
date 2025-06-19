@@ -13,7 +13,7 @@
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]
@@ -63,7 +63,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]
@@ -116,7 +116,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]
@@ -169,7 +169,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]
@@ -221,7 +221,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]
@@ -273,7 +273,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     deltaV = [0.05; 0.01; 0.01]

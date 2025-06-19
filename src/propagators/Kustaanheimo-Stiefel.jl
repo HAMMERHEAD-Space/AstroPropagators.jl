@@ -3,8 +3,8 @@ function KS_ODE!(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     KSp1, KSp2, KSp3, KSp4, KSv1, KSv2, KSv3, KSv4, h, τ = u
 
     ##################################################
@@ -71,7 +71,7 @@ function KS_matrix(u::AbstractArray)
             -u[2] u[1] u[4] -u[3]
             -u[3] -u[4] u[1] u[2]
             u[4] -u[3] u[2] -u[1]
-        ]
+        ],
     )
 end
 

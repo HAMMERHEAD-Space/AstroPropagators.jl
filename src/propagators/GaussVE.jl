@@ -4,8 +4,8 @@ export GaussVE_EOM, GaussVE_EOM!
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Gauss variational propagation schema for orbital trajectories
 
@@ -19,11 +19,8 @@ Returns:
 -`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
 """
 function GaussVE_EOM(
-    u::AbstractVector,
-    ps::ComponentVector,
-    t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    u::AbstractVector, ps::ComponentVector, t::Number, models::AbstractDynamicsModel
+)
     a, e, i, _, ω, f = u
     μ::Number = ps.μ
 
@@ -64,8 +61,8 @@ end
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
 Gauss variational propagation schema for orbital trajectories
 
@@ -84,8 +81,8 @@ function GaussVE_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-) where {N}
+    models::AbstractDynamicsModel,
+)
     du .= GaussVE_EOM(u, p, t, models)
 
     return nothing

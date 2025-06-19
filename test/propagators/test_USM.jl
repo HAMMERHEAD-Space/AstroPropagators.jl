@@ -13,7 +13,7 @@
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     EOM!(du, u, p, t) = USM7_EOM!(du, u, p, t, model_list)
@@ -82,7 +82,9 @@ end
 
     u0_USM7 = Array(USM7(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 86400.0)
 
@@ -145,7 +147,9 @@ end
 
     u0_USM7 = Array(USM7(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 3.0 * 86400.0)
 
@@ -181,7 +185,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     EOM!(du, u, p, t) = USM6_EOM!(du, u, p, t, model_list)
@@ -195,7 +199,6 @@ end
 
     @test NRG[1] ≈ NRG[end]
 
-    # Comparison Against Cowell
     expected_end = [
         29447.829229065504
         21027.31807433234
@@ -250,7 +253,9 @@ end
 
     u0_USM6 = Array(USM6(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 86400.0)
 
@@ -314,7 +319,9 @@ end
 
     u0_USM6 = Array(USM6(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 3 * 86400.0)
 
@@ -350,7 +357,7 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    model_list = (grav_model,)
+    model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
     EOM!(du, u, p, t) = USMEM_EOM!(du, u, p, t, model_list)
@@ -419,7 +426,9 @@ end
 
     u0_USMEM = Array(USMEM(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 86400.0)
 
@@ -483,7 +492,9 @@ end
 
     u0_USMEM = Array(USMEM(Cartesian(u0), p.μ))
 
-    model_list = (grav_model, sun_third_body, moon_third_body, srp_model, drag_model)
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     tspan = (0.0, 3 * 86400.0)
 
