@@ -1,3 +1,5 @@
+using Test
+
 using AstroCoords
 using AstroForceModels
 using AstroPropagators
@@ -10,10 +12,12 @@ using SatelliteToolboxGravityModels
 using SatelliteToolboxTransformations
 using SciMLBase
 using SpaceIndices
-using Test
 
-#using JET
-#using AllocCheck
+using JET
+using AllocCheck
+
+using DifferentiationInterface
+using FiniteDiff, ForwardDiff, Enzyme, Mooncake, PolyesterForwardDiff, Zygote
 
 @testset "AstroPropagators.jl" begin
     include("propagators/test_cowell.jl")
@@ -23,12 +27,22 @@ using Test
     include("events/test_impulsive_maneuvers.jl")
 end
 
-#TODO: NEED TO FIX IN AstroForceModels & SatelliteToolbox
-#@testset "Code Performance" begin
-#    include("test_JET.jl")
-#    include("test_allocs.jl")
-#end
+const _BACKENDS = (
+    ("ForwardDiff", AutoForwardDiff()),
+    ("Enzyme", AutoEnzyme()),
+    ("Mooncake", AutoMooncake(; config=nothing)),
+    ("PolyesterForwardDiff", AutoPolyesterForwardDiff()),
+    ("Zygote", AutoZygote()),
+)
 
-@testset "Aqua.jl" begin
-    Aqua.test_all(AstroPropagators; ambiguities=(recursive = false))
+@testset "Differentiability" begin
+    include("differentiability/test_model_parameters.jl")
+    include("differentiability/test_cowell.jl")
+    include("differentiability/test_gaussVE.jl")
+    include("differentiability/test_milankovich.jl")
+    include("differentiability/test_USM.jl")
+end
+
+@testset "Code Performance" begin
+    include("test_performance.jl")
 end
