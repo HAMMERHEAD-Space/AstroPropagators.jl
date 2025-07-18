@@ -94,7 +94,7 @@ end
     ) == 0
 end
 
-#@testset "EDromo EOM Allocations" begin
+@testset "EDromo EOM Allocations" begin
  
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
@@ -140,21 +140,18 @@ end
     TU = 1.0
     W = 0.0
     t₀ = 0.0
+    ϕ = 0.0
     flag_time = PhysicalTime()
 
-    edromo_kwargs = (; DU=DU, TU=TU, W=W, t₀=t₀, flag_time=flag_time)
-
-
-    
     @test length(
         check_allocs(
-            (u, p, ϕ, models) -> EDromo_EOM(u, p, ϕ, models; edromo_kwargs...),
+            (u, p, ϕ, models) -> EDromo_EOM(u, p, ϕ, models; DU=DU, TU=TU, W=W, t₀=t₀, ϕ=ϕ, flag_time=flag_time),
             (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
         check_allocs(
-            (du, u, p, ϕ, models) -> EDromo_EOM!(du, u, p, ϕ, models; edromo_kwargs...),
+            (du, u, p, ϕ, models) -> EDromo_EOM!(du, u, p, ϕ, models; DU=DU, TU=TU, W=W, t₀=t₀, ϕ=ϕ, flag_time=flag_time),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
