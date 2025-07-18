@@ -3,7 +3,6 @@ using Test
 using AstroCoords
 using AstroForceModels
 using AstroPropagators
-using Aqua
 using ComponentArrays
 using LinearAlgebra
 using OrdinaryDiffEqAdamsBashforthMoulton
@@ -13,6 +12,7 @@ using SatelliteToolboxTransformations
 using SciMLBase
 using SpaceIndices
 
+using Aqua
 using JET
 using AllocCheck
 

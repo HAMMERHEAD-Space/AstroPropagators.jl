@@ -17,7 +17,7 @@ include("auxiliary/util.jl")
 
 # Propagators
 include("propagators/Cowell.jl")
-#include("propagators/EDROMO.jl")
+include("propagators/EDromo.jl")
 include("propagators/GaussVE.jl")
 #include("propagators/Kustaanheimo-Stiefel.jl")
 include("propagators/Milankovich.jl")
