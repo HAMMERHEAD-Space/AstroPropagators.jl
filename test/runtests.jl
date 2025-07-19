@@ -35,13 +35,14 @@ const _BACKENDS = (
     ("Zygote", AutoZygote()),
 )
 
-#@testset "Differentiability" begin
-#    include("differentiability/test_model_parameters.jl")
-#    include("differentiability/test_cowell.jl")
-#    include("differentiability/test_gaussVE.jl")
-#    include("differentiability/test_milankovich.jl")
-#    include("differentiability/test_USM.jl")
-#end
+@testset "Differentiability" begin
+    include("differentiability/test_model_parameters.jl")
+    include("differentiability/test_cowell.jl")
+    include("differentiability/test_edromo.jl")
+    include("differentiability/test_gaussVE.jl")
+    include("differentiability/test_milankovich.jl")
+    include("differentiability/test_USM.jl")
+end
 
 @testset "Code Performance" begin
     include("test_performance.jl")
