@@ -15,36 +15,25 @@
     ] #km, km/s
 
     # For a pure Keplerian problem, the perturbing potential W₀ is 0.
-    edromo_config = set_initial_edromo_configurations(
-        u0_cart,
-        μ;
-        W=(
-            potential(Cartesian(u0_cart), p, 0.0, grav_model) -
-            potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
-        ),
-        flag_time=PhysicalTime(),
+    W = (
+        potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+        potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
+    )
+    edromo_config = RegularizedCoordinateConfig(
+        u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime()
     )
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ; edromo_config...))
+    ϕ₀ = compute_initial_phi(u0_cart, μ, edromo_config)
+
+    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ, ϕ₀, edromo_config))
 
     model_list = CentralBodyDynamicsModel(grav_model)
     # The independent variable is ϕ, so we integrate over one orbit (2π)
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -52,36 +41,13 @@
         VCABM();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
 
-    NRG = zeros(length(sol.u))
-    for i in 1:length(sol.u)
-        NRG[i] = orbitalNRG(
-            EDromo(sol.u[i]),
-            grav_model.μ;
-            set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-        )
-    end
-
-    states = zeros(6, length(sol.u))
-    for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
-    end
-
+    NRG = orbitalNRG.(EDromo.(sol.u), μ, sol.t, [edromo_config])
     @test NRG[1] ≈ NRG[end]
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     expected_end = [
         29447.829229065504
@@ -111,34 +77,24 @@ end
     ] #km, km/s
 
     # For a pure Keplerian problem, the perturbing potential W₀ is 0.
-    edromo_config = set_initial_edromo_configurations(
-        u0_cart,
-        μ;
-        W=potential(Cartesian(u0_cart), p, 0.0, grav_model) -
-          potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ)),
-        flag_time=ConstantTime(),
+    W =
+        potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+        potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
+    edromo_config = RegularizedCoordinateConfig(
+        u0_cart, μ; W=W, t₀=0.0, flag_time=ConstantTime()
     )
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ; edromo_config...))
+    ϕ₀ = compute_initial_phi(u0_cart, μ, edromo_config)
+
+    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ, ϕ₀, edromo_config))
 
     model_list = CentralBodyDynamicsModel(grav_model)
     # The independent variable is ϕ, so we integrate over one orbit (2π)
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -146,36 +102,22 @@ end
         VCABM();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
 
     NRG = zeros(length(sol.u))
     for i in 1:length(sol.u)
-        NRG[i] = orbitalNRG(
-            EDromo(sol.u[i]),
-            grav_model.μ;
-            set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-        )
+        NRG[i] = orbitalNRG(EDromo(sol.u[i]), grav_model.μ, sol.t[i], edromo_config)
     end
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
     @test NRG[1] ≈ NRG[end]
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     expected_end = [
         29447.829229065504
@@ -205,34 +147,24 @@ end
     ] #km, km/s
 
     # For a pure Keplerian problem, the perturbing potential W₀ is 0.
-    edromo_config = set_initial_edromo_configurations(
-        u0_cart,
-        μ;
-        W=potential(Cartesian(u0_cart), p, 0.0, grav_model) -
-          potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ)),
-        flag_time=LinearTime(),
+    W =
+        potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+        potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
+    edromo_config = RegularizedCoordinateConfig(
+        u0_cart, μ; W=W, t₀=0.0, flag_time=LinearTime()
     )
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ; edromo_config...))
+    ϕ₀ = compute_initial_phi(u0_cart, μ, edromo_config)
+
+    u0_EDromo = Array(EDromo(Cartesian(u0_cart), μ, ϕ₀, edromo_config))
 
     model_list = CentralBodyDynamicsModel(grav_model)
     # The independent variable is ϕ, so we integrate over one orbit (2π)
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -240,38 +172,22 @@ end
         VCABM();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
 
     NRG = zeros(length(sol.u))
     for i in 1:length(sol.u)
-        NRG[i] = orbitalNRG(
-            EDromo(sol.u[i]),
-            grav_model.μ;
-            set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-        )
+        NRG[i] = orbitalNRG(EDromo(sol.u[i]), grav_model.μ, sol.t[i], edromo_config)
     end
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(
-                    edromo_config; curr_ϕ=(edromo_config.ϕ + sol.t[i])
-                )...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
     @test NRG[1] ≈ NRG[end]
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     expected_end = [
         29447.829229065504
@@ -329,32 +245,22 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
-        u0,
-        μ;
-        W=potential(Cartesian(u0), p, 0.0, grav_model) -
-          potential(Cartesian(u0), p, 0.0, KeplerianGravityAstroModel(μ=μ)),
-        flag_time=PhysicalTime(),
+    W =
+        potential(Cartesian(u0), p, 0.0, grav_model) -
+        potential(Cartesian(u0), p, 0.0, KeplerianGravityAstroModel(μ=μ))
+    edromo_config = RegularizedCoordinateConfig(
+        u0, μ; W=W, t₀=0.0, flag_time=PhysicalTime()
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -362,27 +268,17 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
 
     sol.u
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [
@@ -440,7 +336,7 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
+    edromo_config = RegularizedCoordinateConfig(
         u0,
         μ;
         W=potential(Cartesian(u0), p, 0.0, grav_model) -
@@ -448,24 +344,15 @@ end
         flag_time=ConstantTime(),
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -473,27 +360,17 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
 
     sol.u
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [
@@ -551,7 +428,7 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
+    edromo_config = RegularizedCoordinateConfig(
         u0,
         μ;
         W=potential(Cartesian(u0), p, 0.0, grav_model) -
@@ -559,24 +436,15 @@ end
         flag_time=LinearTime(),
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 6π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 6π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -584,27 +452,15 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(86400.0; edromo_config...),
+        callback=end_EDromo_integration(86400.0, edromo_config),
     )
-
-    sol.u
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [
@@ -662,7 +518,7 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
+    edromo_config = RegularizedCoordinateConfig(
         u0,
         μ;
         W=potential(Cartesian(u0), p, 0.0, grav_model) -
@@ -670,24 +526,15 @@ end
         flag_time=PhysicalTime(),
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 50π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 50π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -695,27 +542,17 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0; edromo_config...),
+        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [
@@ -773,7 +610,7 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
+    edromo_config = RegularizedCoordinateConfig(
         u0,
         μ;
         W=potential(Cartesian(u0), p, 0.0, grav_model) -
@@ -781,24 +618,15 @@ end
         flag_time=ConstantTime(),
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 50π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 50π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -806,27 +634,17 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0; edromo_config...),
+        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [
@@ -884,7 +702,7 @@ end
 
     μ = GravityModels.gravity_constant(grav_coeffs) / 1E9
 
-    edromo_config = set_initial_edromo_configurations(
+    edromo_config = RegularizedCoordinateConfig(
         u0,
         μ;
         W=potential(Cartesian(u0), p, 0.0, grav_model) -
@@ -892,24 +710,15 @@ end
         flag_time=LinearTime(),
     )
 
-    tspan = (edromo_config.ϕ, edromo_config.ϕ + 50π)
+    ϕ₀ = compute_initial_phi(u0, μ, edromo_config)
+
+    tspan = (ϕ₀, ϕ₀ + 50π)
 
     p_full = ComponentVector(; p..., μ=μ)
 
-    u0_EDromo = Array(EDromo(Cartesian(u0), μ; edromo_config...))
+    u0_EDromo = Array(EDromo(Cartesian(u0), μ, ϕ₀, edromo_config))
 
-    EOM!(du, u, p, t) = EDromo_EOM!(
-        du,
-        u,
-        p,
-        t,
-        model_list;
-        DU=edromo_config.DU,
-        TU=edromo_config.TU,
-        W=edromo_config.W,
-        t₀=edromo_config.t₀,
-        flag_time=edromo_config.flag_time,
-    )
+    EOM!(du, u, p, t) = EDromo_EOM!(du, u, p, t, model_list, edromo_config)
 
     prob = ODEProblem(EOM!, u0_EDromo, tspan, p_full)
     sol = solve(
@@ -917,27 +726,17 @@ end
         VCABM();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0; edromo_config...),
+        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
 
     states = zeros(6, length(sol.u))
     for i in 1:length(sol.u)
-        states[:, i] = Array(
-            Cartesian(
-                EDromo(sol.u[i]),
-                μ;
-                set_edromo_configurations(edromo_config; curr_ϕ=sol.t[i])...,
-            ),
-        )
+        states[:, i] = Array(Cartesian(EDromo(sol.u[i]), μ, sol.t[i], edromo_config))
     end
 
-    final_state = Cartesian(
-        EDromo(sol.u[end]),
-        μ;
-        set_edromo_configurations(edromo_config; curr_ϕ=sol.t[end])...,
-    )
+    final_state = Cartesian(EDromo(sol.u[end]), μ, sol.t[end], edromo_config)
 
     # Regression Test
     expected_end = [

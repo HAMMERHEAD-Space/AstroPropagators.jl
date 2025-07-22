@@ -8,7 +8,7 @@ function EDromo_EOM(
     p::ComponentVector,
     ϕ::Number,
     models::AbstractDynamicsModel,
-    edromo_config,
+    config::RegularizedCoordinateConfig,
 )
 
 Computes the equations of motion for the EDromo formulation. The formulation is based on [1] and [2].
@@ -16,11 +16,11 @@ Computes the equations of motion for the EDromo formulation. The formulation is 
 # Arguments
 -`u::AbstractArray`: The EDromo state vector `[ζ₁, ζ₂, ζ₃, ζ₄, ζ₅, ζ₆, ζ₇, ζ₈]`.
 -`p::ComponentVector`: A `ComponentVector` containing parameters for the propagation,
-  including the gravitational parameter `μ`, the initial Julian Date `JD`, and the
-  `edromo_config`.
+  including the gravitational parameter `μ` and the initial Julian Date `JD`.
 -`ϕ::Number`: The independent variable, which is the fictitious time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
--`edromo_config`: A `NamedTuple` containing the EDromo formulation configurations.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+-`config::RegularizedCoordinateConfig`: Configuration struct containing EDromo formulation parameters.
+
 # References
 
 [1] Baù, G., Bombardelli, C., Peláez, J., and Lorenzini, E., "Nonsingular
@@ -32,14 +32,13 @@ function EDromo_EOM(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
-    models::AbstractDynamicsModel;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    flag_time::AstroCoords.AbstractTimeType,
+    models::AbstractDynamicsModel,
+    config::RegularizedCoordinateConfig,
 )
-    ζ1, ζ2, ζ3, ζ4, ζ5, ζ6, ζ7, ζ8 = u
+    ζ1, ζ2, ζ3, ζ4, ζ5, ζ6, ζ7, _ = u
+
+    # Extract parameters from config
+    DU, TU, flag_time = config.DU, config.TU, config.flag_time
 
     ##################################################
     #* 1. Auxiliary Quantities (1)
@@ -53,14 +52,15 @@ function EDromo_EOM(
 
     cν = (cϕ - ζ1 + (χ * ζ2) / (ϵ + 1.0)) / ρ
     sν = (sϕ - ζ2 - (χ * ζ1) / (ϵ + 1.0)) / ρ
-    
+
     μ::Number = p.μ
 
     ##################################################
     #* 2. Inertial State and Time
     ##################################################
-    u_cart = Cartesian(EDromo(u), μ; DU=DU, TU=TU, W=W, ϕ=ϕ, t₀=t₀, flag_time=flag_time)
-    tt = get_EDromo_time(u; DU=DU, TU=TU, W=W, t₀=t₀, ϕ=ϕ, flag_time=flag_time)
+    # Pass phi separately to coordinate transformations
+    u_cart = Cartesian(EDromo(u), μ, ϕ, config)
+    tt = get_EDromo_time(u, ϕ, config)
 
     ##################################################
     #* 3. Potential Based Perturbations
@@ -137,7 +137,7 @@ function EDromo_EOM!(
     p::ComponentVector,
     ϕ::Number,
     models::AbstractDynamicsModel,
-    edromo_config,
+    config::RegularizedCoordinateConfig,
 )
 
 Computes the equations of motion for the EDromo formulation. The formulation is based on [1] and [2].
@@ -146,11 +146,11 @@ Computes the equations of motion for the EDromo formulation. The formulation is 
 -`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
 -`u::AbstractArray`: The EDromo state vector `[ζ₁, ζ₂, ζ₃, ζ₄, ζ₅, ζ₆, ζ₇, ζ₈]`.
 -`p::ComponentVector`: A `ComponentVector` containing parameters for the propagation,
-  including the gravitational parameter `μ`, the initial Julian Date `JD`, and the
-  `edromo_config`.
+  including the gravitational parameter `μ` and the initial Julian Date `JD`.
 -`ϕ::Number`: The independent variable, which is the fictitious time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
--`edromo_config`: A `NamedTuple` containing the EDromo formulation configurations.
+-`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+-`config::RegularizedCoordinateConfig`: Configuration struct containing EDromo formulation parameters.
+
 # References
 
 [1] Baù, G., Bombardelli, C., Peláez, J., and Lorenzini, E., "Nonsingular
@@ -163,14 +163,10 @@ function EDromo_EOM!(
     u::AbstractVector,
     p::ComponentVector,
     ϕ::Number,
-    models::AbstractDynamicsModel;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    flag_time::AstroCoords.AbstractTimeType,
+    models::AbstractDynamicsModel,
+    config::RegularizedCoordinateConfig,
 )
-    du .= EDromo_EOM(u, p, ϕ, models; DU=DU, TU=TU, W=W, t₀=t₀, flag_time=flag_time)
+    du .= EDromo_EOM(u, p, ϕ, models, config)
 
     return nothing
 end
@@ -219,7 +215,7 @@ The orbital frame is defined by the radial, tangential, and normal directions.
 end
 
 """
-    EDromo_time_condition(u, ϕ, integrator; kwargs...)
+    EDromo_time_condition(u, ϕ, integrator, config; event_time=0.0)
 
 Event function for `DifferentialEquations.jl` callbacks which triggers
 when the current integration time equals a specified `event_time`.
@@ -228,139 +224,74 @@ when the current integration time equals a specified `event_time`.
 function EDromo_time_condition(
     u::AbstractVector,
     ϕ::Number,
-    integrator::T;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    flag_time::AstroCoords.AbstractTimeType,
+    integrator::T,
+    config::RegularizedCoordinateConfig;
     event_time::Number=0.0,
 ) where {T<:SciMLBase.DEIntegrator}
-    t = get_EDromo_time(u; DU=DU, TU=TU, W=W, t₀=t₀, ϕ=ϕ, flag_time=flag_time)
+    # Pass phi separately
+    t = get_EDromo_time(u, ϕ, config)
     return t - event_time
 end
 
 """
-    end_EDromo_integration(event_time; kwargs...)
+    end_EDromo_integration(stop_time, config)
 
 Returns a `ContinuousCallback` which terminates a `DifferentialEquations.jl`
 integration when the current time equals `event_time`.
 
 """
-function end_EDromo_integration(
-    stop_time::Number;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    ϕ::Number,
-    flag_time::AstroCoords.AbstractTimeType,
-)
+function end_EDromo_integration(stop_time::Number, config::RegularizedCoordinateConfig)
     ContinuousCallback(
-        (u, ϕ, integrator) -> EDromo_time_condition(
-            u,
-            ϕ,
-            integrator;
-            DU=DU,
-            TU=TU,
-            W=W,
-            t₀=t₀,
-            flag_time=flag_time,
-            event_time=stop_time,
-        ),
+        (u, ϕ, integrator) ->
+            EDromo_time_condition(u, ϕ, integrator, config; event_time=stop_time),
         (integrator) -> terminate!(integrator);
     )
 end
 
 """
-    impulsive_burn_edromo!(integrator, ΔV; kwargs...)
+    impulsive_burn_edromo!(integrator, ΔV, config)
 
 Applies an impulsive maneuver `ΔV` to an EDromo state within a
 `DifferentialEquations.jl` integrator.
 
 """
 function impulsive_burn_edromo!(
-    integrator::T,
-    ΔV::AbstractVector;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    ϕ::Number,
-    flag_time::AstroCoords.AbstractTimeType,
+    integrator::T, ΔV::AbstractVector, config::RegularizedCoordinateConfig
 ) where {T<:SciMLBase.DEIntegrator}
-    cart_state = Cartesian(
-        EDromo(integrator.u),
-        integrator.p.μ;
-        DU=DU,
-        TU=TU,
-        W=W,
-        t₀=t₀,
-        ϕ=integrator.t,
-        flag_time=flag_time,
-    )
+    # Pass phi separately to coordinate transformations
+    cart_state = Cartesian(EDromo(integrator.u), integrator.p.μ, integrator.t, config)
 
     new_state = cart_state + SVector{6}(0, 0, 0, ΔV[1], ΔV[2], ΔV[3])
     new_cart_state = Cartesian(new_state...)
 
-    t_maneuver = get_EDromo_time(
-        integrator.u; DU=DU, TU=TU, W=W, t₀=t₀, ϕ=integrator.t, flag_time=flag_time
+    t_maneuver = get_EDromo_time(integrator.u, integrator.t, config)
+
+    # Create new config for the maneuver with updated t₀
+    maneuver_config = RegularizedCoordinateConfig(
+        config.DU, config.TU, config.W, t_maneuver, config.flag_time
     )
 
+    # Convert back to EDromo using the phi from the maneuver time
     integrator.u = params(
-        EDromo(
-            new_cart_state,
-            integrator.p.μ;
-            DU=DU,
-            TU=TU,
-            W=W,
-            t₀=t_maneuver,
-            ϕ=integrator.t,
-            flag_time=flag_time,
-        ),
+        EDromo(new_cart_state, integrator.p.μ, integrator.t, maneuver_config)
     )
 
     return nothing
 end
 
 """
-    EDromo_burn(stop_time, ΔV; kwargs...)
+    EDromo_burn(burn_time, ΔV, config)
 
 Returns a `ContinuousCallback` which triggers an `impulsive_burn_edromo!`
-maneuver at a specified `stop_time`.
+maneuver at a specified `burn_time`.
 
 """
 function EDromo_burn(
-    burn_time::Number,
-    ΔV::AbstractVector;
-    DU::Number,
-    TU::Number,
-    W::Number,
-    t₀::Number,
-    ϕ::Number,
-    flag_time::AstroCoords.AbstractTimeType,
+    burn_time::Number, ΔV::AbstractVector, config::RegularizedCoordinateConfig
 )
     ContinuousCallback(
-        (u, ϕ, integrator) -> EDromo_time_condition(
-            u,
-            ϕ,
-            integrator;
-            DU=DU,
-            TU=TU,
-            W=W,
-            t₀=t₀,
-            flag_time=flag_time,
-            event_time=burn_time,
-        ),
-        (integrator) -> impulsive_burn_edromo!(
-            integrator,
-            ΔV;
-            DU=DU,
-            TU=TU,
-            W=W,
-            t₀=t₀,
-            ϕ=integrator.t,
-            flag_time=flag_time,
-        ),
+        (u, ϕ, integrator) ->
+            EDromo_time_condition(u, ϕ, integrator, config; event_time=burn_time),
+        (integrator) -> impulsive_burn_edromo!(integrator, ΔV, config),
     )
 end
