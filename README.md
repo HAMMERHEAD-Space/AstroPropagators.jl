@@ -21,9 +21,7 @@ This project implements several propagation methods for the **AstroPropagators.j
     - [x] USM7
     - [x] USM6
     - [x] USMEM
-
-
-NOTE: Although the code for some of these are present, only the checked ones currently supported!
+- [ ] GEqOE
 
 ## Installation
 

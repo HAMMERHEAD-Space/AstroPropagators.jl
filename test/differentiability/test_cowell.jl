@@ -1,8 +1,8 @@
-@testset "Cowell State Differntiability" begin
+@testset "Cowell State Differentiability" begin
     SpaceIndices.init()
 
     for backend in _BACKENDS
-        testname = "Cowell Differntiability " * backend[1]
+        testname = "Cowell Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Cowell_EOM(x, _p, _t, _model_list), AutoFiniteDiff(), _state
@@ -19,10 +19,10 @@
     SpaceIndices.destroy()
 end
 
-@testset "Cowell Time Differntiability" begin
+@testset "Cowell Time Differentiability" begin
     SpaceIndices.init()
     for backend in _BACKENDS
-        testname = "Cowell Differntiability " * backend[1]
+        testname = "Cowell Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_derivative(
                 (x) -> Cowell_EOM(_state, _p, x, _model_list), AutoFiniteDiff(), _t
@@ -39,7 +39,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "Cowell Parameter Differntiability" begin
+@testset "Cowell Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -70,7 +70,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "Cowell Differntiability " * backend[1]
+        testname = "Cowell Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]

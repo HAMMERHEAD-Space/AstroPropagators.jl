@@ -16,8 +16,8 @@ using Aqua
 using JET
 using AllocCheck
 
-#using DifferentiationInterface
-#using FiniteDiff, ForwardDiff, Enzyme, Mooncake, PolyesterForwardDiff, Zygote
+using DifferentiationInterface
+using FiniteDiff, ForwardDiff, Enzyme, Mooncake, PolyesterForwardDiff, Zygote
 
 @testset "AstroPropagators.jl" begin
     include("propagators/test_cowell.jl")
@@ -30,22 +30,24 @@ using AllocCheck
     include("events/test_impulsive_maneuvers.jl")
 end
 
-#const _BACKENDS = (
-#   ("ForwardDiff", AutoForwardDiff()),
-#    ("Enzyme", AutoEnzyme()),
-#    ("Mooncake", AutoMooncake(; config=nothing)),
-#    ("PolyesterForwardDiff", AutoPolyesterForwardDiff()),
-#    ("Zygote", AutoZygote()),
-#)
+const _BACKENDS = (
+    ("ForwardDiff", AutoForwardDiff()),
+    ("Enzyme", AutoEnzyme()),
+    ("Mooncake", AutoMooncake(; config=nothing)),
+    ("PolyesterForwardDiff", AutoPolyesterForwardDiff()),
+    ("Zygote", AutoZygote()),
+)
 
-#@testset "Differentiability" begin
-#    include("differentiability/test_model_parameters.jl")
-#    include("differentiability/test_cowell.jl")
-#    include("differentiability/test_edromo.jl")
-#    include("differentiability/test_gaussVE.jl")
-#    include("differentiability/test_milankovich.jl")
-#    include("differentiability/test_USM.jl")
-#end
+@testset "Differentiability" begin
+    include("differentiability/test_model_parameters.jl")
+    include("differentiability/test_cowell.jl")
+    include("differentiability/test_edromo.jl")
+    include("differentiability/test_gaussVE.jl")
+    include("differentiability/test_KS.jl")
+    include("differentiability/test_milankovich.jl")
+    include("differentiability/test_StiSche.jl")
+    include("differentiability/test_USM.jl")
+end
 
 @testset "Code Performance" begin
     include("test_performance.jl")

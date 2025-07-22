@@ -1,10 +1,9 @@
-@testset "EDromo State Differentiability" begin
+@testset "Stiefel-Scheifele State Differentiability" begin
     SpaceIndices.init()
 
     time_types = (
-        ("PhysicalTime", _state_edromo_pt, _config_pt, _ϕ_pt),
-        ("ConstantTime", _state_edromo_ct, _config_ct, _ϕ_ct),
-        ("LinearTime", _state_edromo_lt, _config_lt, _ϕ_lt),
+        ("PhysicalTime", _state_stische_pt, _config_pt, _ϕ_pt),
+        ("LinearTime", _state_stische_lt, _config_lt, _ϕ_lt),
     )
 
     for backend in _BACKENDS
@@ -12,16 +11,16 @@
             continue
         end
         for (time_type, state, config, ϕ) in time_types
-            testname = "EDromo Differentiability " * backend[1] * " " * time_type
+            testname = "Stiefel-Scheifele Differentiability " * backend[1] * " " * time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_jacobian(
-                    (x) -> EDromo_EOM(x, _p2, ϕ, _model_list, config),
+                    (x) -> StiSche_EOM(x, _p2, ϕ, _model_list, config),
                     AutoFiniteDiff(),
                     state,
                 )
 
                 f_ad, df_ad = value_and_jacobian(
-                    (x) -> Array(EDromo_EOM(x, _p2, ϕ, _model_list, config)),
+                    (x) -> Array(StiSche_EOM(x, _p2, ϕ, _model_list, config)),
                     backend[2],
                     state,
                 )
@@ -34,13 +33,12 @@
     SpaceIndices.destroy()
 end
 
-@testset "EDromo Time Differentiability" begin
+@testset "Stiefel-Scheifele Time Differentiability" begin
     SpaceIndices.init()
 
     time_types = (
-        ("PhysicalTime", _state_edromo_pt, _config_pt, _ϕ_pt),
-        ("ConstantTime", _state_edromo_ct, _config_ct, _ϕ_ct),
-        ("LinearTime", _state_edromo_lt, _config_lt, _ϕ_lt),
+        ("PhysicalTime", _state_stische_pt, _config_pt, _ϕ_pt),
+        ("LinearTime", _state_stische_lt, _config_lt, _ϕ_lt),
     )
 
     for backend in _BACKENDS
@@ -57,16 +55,19 @@ end
             )
         end
         for (time_type, state, config, ϕ) in time_types
-            testname = "EDromo Time Differentiability " * backend[1] * " " * time_type
+            testname =
+                "Stiefel-Scheifele Time Differentiability " * backend[1] * " " * time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_derivative(
-                    (x) -> EDromo_EOM(Array(state), _p2, x, _model_list, config),
+                    (x) -> StiSche_EOM(Array(state), _p2, x, _model_list, config),
                     AutoFiniteDiff(),
                     ϕ,
                 )
 
                 f_ad, df_ad = value_and_derivative(
-                    (x) -> Array(EDromo_EOM(Array(state), _p2, x, _model_list, config)),
+                    (x) -> Array(
+                        StiSche_EOM(Array(state), _p2, x, _model_list, config)
+                    ),
                     backend[2],
                     ϕ,
                 )
@@ -79,13 +80,12 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "EDromo Parameter Differentiability" begin
+@testset "Stiefel-Scheifele Parameter Differentiability" begin
     SpaceIndices.init()
 
     time_types = (
-        ("PhysicalTime", _state_edromo_pt, _config_pt, _ϕ_pt),
-        ("ConstantTime", _state_edromo_ct, _config_ct, _ϕ_ct),
-        ("LinearTime", _state_edromo_lt, _config_lt, _ϕ_lt),
+        ("PhysicalTime", _state_stische_pt, _config_pt, _ϕ_pt),
+        ("LinearTime", _state_stische_lt, _config_lt, _ϕ_lt),
     )
 
     function dynamics_params(
@@ -109,7 +109,7 @@ end
         models = (_sun_model, _moon_model, srp_model, drag_model)
         model_list = CentralBodyDynamicsModel(_grav_model, models)
 
-        return EDromo_EOM(Array(state), _p2, ϕ, model_list, config)
+        return StiSche_EOM(Array(state), _p2, ϕ, model_list, config)
     end
 
     for backend in _BACKENDS
@@ -126,7 +126,11 @@ end
             )
         end
         for (time_type, state, config, ϕ) in time_types
-            testname = "EDromo Parameter Differentiability " * backend[1] * " " * time_type
+            testname =
+                "Stiefel-Scheifele Parameter Differentiability " *
+                backend[1] *
+                " " *
+                time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_jacobian(
                     (x) -> Array(dynamics_params(x, state, config, ϕ)),
