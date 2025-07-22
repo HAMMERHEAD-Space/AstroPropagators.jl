@@ -1,5 +1,7 @@
 # AstroPropagators
 
+## IMPORTANT NOTE: While the existing functions will work, for the most performance and differentiation capability, use one of the PR and instructions detailed there.
+
 [![CI](https://github.com/jmurphy6895/AstroPropagators.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/jmurphy6895/AstroPropagators.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![codecov](https://codecov.io/gh/jmurphy6895/AstroPropagators.jl/branch/main/graph/badge.svg?token=47G4OLV6PD)](https://codecov.io/gh/jmurphy6895/AstroPropagators.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)][docs-stable-url]
