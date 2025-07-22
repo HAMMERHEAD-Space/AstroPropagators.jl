@@ -148,6 +148,8 @@ end
         0.13273831002165992
     ]
 
+    μ = p.μ
+
     W = (
         potential(Cartesian(u0_cart), p, 0.0, grav_model) -
         potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
@@ -177,6 +179,19 @@ end
     @test length(
         check_allocs(
             (du, u, p, ϕ, models) -> KS_EOM!(du, u, p, ϕ, models, config),
+            (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
+        ),
+    ) == 0
+
+    @test length(
+        check_allocs(
+            (u, p, ϕ, models) -> StiSche_EOM(u, p, ϕ, models, config),
+            (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
+        ),
+    ) == 0
+    @test length(
+        check_allocs(
+            (du, u, p, ϕ, models) -> StiSche_EOM!(du, u, p, ϕ, models, config),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0

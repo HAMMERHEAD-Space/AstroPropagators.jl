@@ -21,7 +21,7 @@ include("propagators/EDromo.jl")
 include("propagators/GaussVE.jl")
 include("propagators/Kustaanheimo-Stiefel.jl")
 include("propagators/Milankovich.jl")
-#include("propagators/Stiefel-Scheifel.jl")
+include("propagators/Stiefel-Scheifele.jl")
 include("propagators/USM.jl")
 
 # Events

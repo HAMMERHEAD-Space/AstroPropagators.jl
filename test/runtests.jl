@@ -25,6 +25,7 @@ using AllocCheck
     include("propagators/test_gaussVE.jl")
     include("propagators/test_KS.jl")
     include("propagators/test_milankovich.jl")
+    include("propagators/test_StiSche.jl")
     include("propagators/test_USM.jl")
     include("events/test_impulsive_maneuvers.jl")
 end

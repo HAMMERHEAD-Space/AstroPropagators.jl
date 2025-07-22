@@ -13,10 +13,10 @@ This project implements several propagation methods for the **AstroPropagators.j
 
 - [x] Cowell
 - [x] Gauss Variational Equations
-- [ ] EDromo
-- [ ] Kustaanheimo-Stiefel
+- [x] EDromo
+- [x] Kustaanheimo-Stiefel
 - [x] Milankovich
-- [ ] Stiefel-Scheifel
+- [x] Stiefel-Scheifel
 - [X] Unified State Model
     - [x] USM7
     - [x] USM6
