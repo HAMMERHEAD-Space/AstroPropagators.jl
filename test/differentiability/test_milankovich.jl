@@ -46,7 +46,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "Milankovich Parameter Differntiability" begin
+@testset "Milankovich Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -77,7 +77,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "Milankovich Differntiability " * backend[1]
+        testname = "Milankovich Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]

@@ -3,7 +3,6 @@ using Test
 using AstroCoords
 using AstroForceModels
 using AstroPropagators
-using Aqua
 using ComponentArrays
 using LinearAlgebra
 using OrdinaryDiffEqAdamsBashforthMoulton
@@ -13,6 +12,7 @@ using SatelliteToolboxTransformations
 using SciMLBase
 using SpaceIndices
 
+using Aqua
 using JET
 using AllocCheck
 
@@ -21,8 +21,11 @@ using FiniteDiff, ForwardDiff, Enzyme, Mooncake, PolyesterForwardDiff, Zygote
 
 @testset "AstroPropagators.jl" begin
     include("propagators/test_cowell.jl")
+    include("propagators/test_EDromo.jl")
     include("propagators/test_gaussVE.jl")
+    include("propagators/test_KS.jl")
     include("propagators/test_milankovich.jl")
+    include("propagators/test_StiSche.jl")
     include("propagators/test_USM.jl")
     include("events/test_impulsive_maneuvers.jl")
 end
@@ -38,8 +41,11 @@ const _BACKENDS = (
 @testset "Differentiability" begin
     include("differentiability/test_model_parameters.jl")
     include("differentiability/test_cowell.jl")
+    include("differentiability/test_edromo.jl")
     include("differentiability/test_gaussVE.jl")
+    include("differentiability/test_KS.jl")
     include("differentiability/test_milankovich.jl")
+    include("differentiability/test_StiSche.jl")
     include("differentiability/test_USM.jl")
 end
 

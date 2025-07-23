@@ -2,14 +2,18 @@
 abstract type AbstractPropType end
 
 export CowellPropagator,
+    EDromoPropagator,
     GaussVEPropagator,
+    KSPropagator,
     MilankovichPropagator,
     USM7Propagator,
     USM6Propagator,
     USMEMPropagator
 
 struct CowellPropagator <: AbstractPropType end
+struct EDromoPropagator <: AbstractPropType end
 struct GaussVEPropagator <: AbstractPropType end
+struct KSPropagator <: AbstractPropType end
 struct MilankovichPropagator <: AbstractPropType end
 struct USM7Propagator <: AbstractPropType end
 struct USM6Propagator <: AbstractPropType end
@@ -21,6 +25,7 @@ function propagate(
     models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
     tspan::Tuple{TT,TT};
     prop_type::AbstractPropType=CowellPropagator(),
+    config::Union{RegularizedCoordinateConfig,Nothing}=nothing,
     tsteps::Union{Vector{<:AbstractFloat},Nothing}=nothing,
     ODE_solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=VCABM(),
     abstol::Float64=1E-13,
@@ -34,6 +39,10 @@ function propagate(
             Cowell_EOM!(du, u, p, t, models)
         elseif prop_type == GaussVEPropagator()
             GaussVE_EOM!(du, u, p, t, models)
+        elseif prop_type == EDromoPropagator()
+            EDromo_EOM!(du, u, p, t, models, config)
+        elseif prop_type == KSPropagator()
+            KS_EOM!(du, u, p, t, models, config)
         elseif prop_type == MilankovichPropagator()
             Milankovich_EOM!(du, u, p, t, models)
         elseif prop_type == USM7Propagator()
