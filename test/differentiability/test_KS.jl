@@ -15,9 +15,7 @@
                 "Kustaanheimo-Stiefel Differentiability " * backend[1] * " " * time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_jacobian(
-                    (x) -> KS_EOM(x, _p2, ϕ, _model_list, config),
-                    AutoFiniteDiff(),
-                    state,
+                    (x) -> KS_EOM(x, _p2, ϕ, _model_list, config), AutoFiniteDiff(), state
                 )
 
                 f_ad, df_ad = value_and_jacobian(
