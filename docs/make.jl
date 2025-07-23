@@ -9,7 +9,16 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Usage" => "man/usage.md",
-        "API" => "man/api.md",
+        "Propagators" => Any[
+            "propagators/cowell.md",
+            "propagators/gauss_ve.md",
+            "propagators/edromo.md",
+            "propagators/kustaanheimo_stiefel.md",
+            "propagators/stiefel_scheifele.md",
+            "propagators/milankovich.md",
+            "propagators/usm.md",
+        ],
+        "API Reference" => "man/api.md",
         "Library" => "lib/library.md",
     ],
 )
