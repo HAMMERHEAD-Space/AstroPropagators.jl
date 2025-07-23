@@ -55,7 +55,10 @@ end
         end
         for (time_type, state, config, ϕ) in time_types
             testname =
-                "Kustaanheimo-Stiefel Time Differentiability " * backend[1] * " " * time_type
+                "Kustaanheimo-Stiefel Time Differentiability " *
+                backend[1] *
+                " " *
+                time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_derivative(
                     (x) ->
