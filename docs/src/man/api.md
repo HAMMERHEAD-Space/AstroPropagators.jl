@@ -71,7 +71,7 @@ sol = propagate(u0, p, models, tspan;
 For practical examples and step-by-step tutorials, see:
 
 - **[Usage Guide](usage.md)**: Comprehensive usage examples
-- **[Propagator Documentation](propagators/index.md)**: Detailed method descriptions
+- **[Propagator Documentation](../propagators/index.md)**: Detailed method descriptions
 - **Test suite**: Working examples in the `/test` directory
 - **Benchmarks**: Performance comparisons in the `/benchmark` directory
 
