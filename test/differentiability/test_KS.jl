@@ -19,9 +19,7 @@
                 )
 
                 f_ad, df_ad = value_and_jacobian(
-                    (x) -> Array(KS_EOM(x, _p2, ϕ, _model_list, config)),
-                    backend[2],
-                    state,
+                    (x) -> Array(KS_EOM(x, _p2, ϕ, _model_list, config)), backend[2], state
                 )
 
                 @test f_fd ≈ f_ad
