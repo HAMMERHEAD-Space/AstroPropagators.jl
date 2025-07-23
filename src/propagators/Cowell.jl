@@ -1,31 +1,62 @@
-function Cowell_EOM!(
-    du::AbstractArray,
-    u::AbstractArray,
+export Cowell_EOM, Cowell_EOM!
+"""
+    function Cowell_EOM(
+        u::AbstractVector,
+        p::ComponentVector,
+        t::Number,
+        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+    ) where {N}
+
+Cowell propagation schema for orbital trajectories
+
+Arguments:
+-`u::AbstractVector`: The current Cartesian state.
+-`p::ComponentVector`: The parameter vector, only the simulation start date JD is provided.
+-`t::Number`: The current time.
+-`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+
+Returns:
+-`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+"""
+function Cowell_EOM(
+    u::AbstractVector,
     p::ComponentVector,
     t::Number,
-    grav_coeffs::AbstractGravityModel,
-    eop_data::EOPData_IAU1980;
-    max_order::Int=-1,
-    max_degree::Int=-1,
-    atmosphere_type::Symbol=:JR1971,
-    drag_model::Symbol=:Cannonball,
-    srp_model::Symbol=:Cannonball,
-    shadow_model::Symbol=:Conical,
-    lunar_3rd_body::Bool=true,
-    solar_3rd_body::Bool=true)
+    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+) where {N}
+    accel = build_dynamics_model(u, p, t, models)
+    return SVector{6}(u[4], u[5], u[6], accel[1], accel[2], accel[3])
+end
 
-    du .= [@view(u[4:6]);
-        potential_accel(u, p, grav_coeffs, eop_data, t; 
-            max_order=max_order, 
-            max_degree=max_degree) +
-        non_potential_accel(u, p, t, eop_data; 
-            atmosphere_type=atmosphere_type, 
-            srp_model=srp_model, 
-            drag_model=drag_model, 
-            shadow_model=shadow_model, 
-            lunar_3rd_body=lunar_3rd_body, 
-            solar_3rd_body=solar_3rd_body)]
+"""
+    function Cowell_EOM!(
+        du::AbstractVector,
+        u::AbstractVector,
+        p::ComponentVector,
+        t::Number,
+        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+    ) where {N}
+
+Cowell propagation schema for orbital trajectories
+
+Arguments:
+-`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
+-`u::AbstractVector`: The current Cartesian state.
+-`p::ComponentVector`: The parameter vector, only the simulation start date JD is provided.
+-`t::Number`: The current time.
+-`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+
+Returns:
+- `nothing`
+"""
+function Cowell_EOM!(
+    du::AbstractVector,
+    u::AbstractVector,
+    p::ComponentVector,
+    t::Number,
+    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+) where {N}
+    du .= Cowell_EOM(u, p, t, models)
 
     return nothing
-
 end

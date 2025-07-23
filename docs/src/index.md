@@ -51,13 +51,6 @@ julia> using Pkg
 julia> Pkg.add("AstroPropagators")
 ```
 
-For development or access to the latest features:
-
-```julia
-julia> using Pkg
-julia> Pkg.add(url="https://github.com/jmurphy6895/AstroPropagators.jl.git")
-```
-
 ## Applications
 
 AstroPropagators.jl is suitable for a wide range of astrodynamics applications:

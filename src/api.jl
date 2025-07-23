@@ -1,94 +1,60 @@
+
+abstract type AbstractPropType end
+
+export CowellPropagator,
+    GaussVEPropagator,
+    MilankovichPropagator,
+    USM7Propagator,
+    USM6Propagator,
+    USMEMPropagator
+
+struct CowellPropagator <: AbstractPropType end
+struct GaussVEPropagator <: AbstractPropType end
+struct MilankovichPropagator <: AbstractPropType end
+struct USM7Propagator <: AbstractPropType end
+struct USM6Propagator <: AbstractPropType end
+struct USMEMPropagator <: AbstractPropType end
+
 function propagate(
     u0::AbstractArray,
     p::ComponentArray,
-    tspan::Tuple{Number, Number};
-    tsteps=nothing,
-    ODE_solver=VCABM(),
-    abstol=1E-13,
-    reltol=1E-13,
-    grav_model::AbstractGravityModel=load(IcgemFile, fetch_icgem_file(:EGM2008)),
-    eop_data::EOPData_IAU1980=get_iers_eop(),
-    prop_type::Symbol=:DROMO,
-    max_order::Int=72,
-    max_degree::Int=72,
-    atmosphere_type::Symbol=:JR1971,
-    drag_model::Symbol=:Cannonball,
-    srp_model::Symbol=:Cannonball,
-    shadow_model::Symbol=:Conical,
-    lunar_3rd_body::Bool=true,
-    solar_3rd_body::Bool=true,
-    output_file::Union{String, Nothing}=nothing)
+    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+    tspan::Tuple{Number,Number};
+    prop_type::AbstractPropType=CowellPropagator(),
+    tsteps::Union{Vector{<:AbstractFloat},Nothing}=nothing,
+    ODE_solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=VCABM(),
+    abstol::Float64=1E-13,
+    reltol::Float64=1E-13,
+    output_file::Union{String,Nothing}=nothing,
+) where {N}
 
-    if (atmosphere_type != :None || atmosphere_type != :ExpAtmo)
-        SpaceIndices.init()
+    #TODO: DO THIS MORE INTELLIGENTLY
+    EOM!(du, u, p, t) =
+        if prop_type == CowellPropagator()
+            Cowell_EOM!(du, u, p, t, models)
+        elseif prop_type == GaussVEPropagator()
+            GaussVE_EOM!(du, u, p, t, models)
+        elseif prop_type == MilankovichPropagator()
+            Milankovich_EOM!(du, u, p, t, models)
+        elseif prop_type == USM7Propagator()
+            USM7_EOM!(du, u, p, t, models)
+        elseif prop_type == USM6Propagator()
+            USM6_EOM!(du, u, p, t, models)
+        elseif prop_type == USMEMPropagator()
+            USMEM_EOM!(du, u, p, t, models)
+        end
+
+    ODE_prob = ODEProblem{true}(EOM!, u0, tspan, p)
+
+    sol = solve(ODE_prob, ODE_solver; reltol=reltol, abstol=abstol)
+
+    if output_file !== nothing
+        times = (tsteps === nothing) ? sol.t : tsteps
+        states = Array(sol(times))
+
+        #TODO: print to file
+        #TODO: Support Ephemeris Writing
     end
 
-    EOM!(du, u, p, t) = 
-        if prop_type == :Cowell
-            Cowell_EOM!(du, u, p, t, grav_model, eop_data;
-                max_degree=max_degree,
-                max_order=max_order,
-                atmosphere_type=atmosphere_type,
-                drag_model=drag_model,
-                srp_model=srp_model,
-                shadow_model=shadow_model,
-                lunar_3rd_body=lunar_3rd_body,
-                solar_3rd_body=solar_3rd_body)
-        elseif prop_type == :EDROMO
-            EDROMO_EOM!(du, u, p, t, grav_model, eop_data;
-                max_degree=max_degree,
-                max_order=max_order,
-                atmosphere_type=atmosphere_type,
-                drag_model=drag_model,
-                srp_model=srp_model,
-                shadow_model=shadow_model,
-                lunar_3rd_body=lunar_3rd_body,
-                solar_3rd_body=solar_3rd_body)
-        elseif prop_type == :KS
-            KS_EOM!(du, u, p, t, grav_model, eop_data;
-                max_degree=max_degree,
-                max_order=max_order,
-                atmosphere_type=atmosphere_type,
-                drag_model=drag_model,
-                srp_model=srp_model,
-                shadow_model=shadow_model,
-                lunar_3rd_body=lunar_3rd_body,
-                solar_3rd_body=solar_3rd_body)
-        elseif prop_type == :STI_SCHE
-            STI_SCHE_EOM!(du, u, p, t, grav_model, eop_data;
-                max_degree=max_degree,
-                max_order=max_order,
-                atmosphere_type=atmosphere_type,
-                drag_model=drag_model,
-                srp_model=srp_model,
-                shadow_model=shadow_model,
-                lunar_3rd_body=lunar_3rd_body,
-                solar_3rd_body=solar_3rd_body)
-        elseif prop_type == :USM
-            USM7_EOM!(du, u, p, t, grav_model, eop_data;
-                max_degree=max_degree,
-                max_order=max_order,
-                atmosphere_type=atmosphere_type,
-                drag_model=drag_model,
-                srp_model=srp_model,
-                shadow_model=shadow_model,
-                lunar_3rd_body=lunar_3rd_body,
-                solar_3rd_body=solar_3rd_body)
-        end
-
-        #TODO: CONVERT u0
-
-        ODE_prob = ODEProblem(EOM!, u0, tspan, p)
-
-        sol = solve(ODE_prob, ODE_solver, reltol=reltol, abstol=abstol)
-
-        if output_file !== nothing
-            times = (tsteps === nothing) ? sol.t : tsteps
-            states = Array(sol(times))
-
-            #TODO: print to file
-        end
-
-        return sol
-
+    return sol
 end

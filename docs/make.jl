@@ -1,12 +1,14 @@
 using Documenter
-using HAMMERHEAD
+using AstroPropagators
 
-makedocs(
-    modules = [HAMMERHEAD],
-    format=Documenter.HTML(; prettyurls=!("local" in ARGS), highlights=["yaml"], ansicolor=true), 
-    sitename = "HAMMERHEAD.jl",
-    authors = "Jordan Murphy",
-    pages = [
+makedocs(;
+    modules=[AstroPropagators],
+    format=Documenter.HTML(;
+        prettyurls=!("local" in ARGS), highlights=["yaml"], ansicolor=true
+    ),
+    sitename="AstroPropagators.jl",
+    authors="Jordan Murphy",
+    pages=[
         "Home" => "index.md",
         "Usage" => "man/usage.md",
         "Propagators" => Any[
@@ -23,7 +25,4 @@ makedocs(
     ],
 )
 
-deploydocs(
-    repo = "github.com/jmurphy6895/HAMMERHEAD.jl.git",
-    target = "build",
-)
+deploydocs(; repo="github.com/jmurphy6895/AstroPropagators.jl.git", target="build")

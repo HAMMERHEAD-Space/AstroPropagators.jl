@@ -1,8 +1,8 @@
 Library
 =======
 
-Documentation for `HAMMERHEAD.jl`.
+Documentation for `AstroPropagators.jl`.
 
 ```@autodocs
-Modules = [HAMMERHEAD]
+Modules = [AstroPropagators]
 ```
