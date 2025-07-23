@@ -59,8 +59,7 @@ end
                 time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_derivative(
-                    (x) ->
-                        KS_EOM(Array(state), _p2, x, _model_list, config),
+                    (x) -> KS_EOM(Array(state), _p2, x, _model_list, config),
                     AutoFiniteDiff(),
                     ϕ,
                 )
