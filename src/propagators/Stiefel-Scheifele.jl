@@ -78,8 +78,8 @@ function StiSche_EOM(
     if config.flag_time isa PhysicalTime
         dτ = 0.5 * r_mag / ω
     elseif config.flag_time isa LinearTime
-        μ_nd = μ * TU^2 / DU^3
-        lte1 = (μ_nd - 2.0 * r_mag * U) / (8.0 * ω^3)
+        μ_non_dim = μ * TU^2 / DU^3
+        lte1 = (μ_non_dim - 2.0 * r_mag * U) / (8.0 * ω^3)
         lte2 = (r_mag / (16.0 * ω^3)) * dot(KSp, ∇U_u - 2.0 * Lp)
         lte3 = (2.0 / ω^2) * dω * dot(KSp, KSv)
         dτ = lte1 - lte2 - lte3
