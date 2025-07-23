@@ -12,6 +12,7 @@ makedocs(;
         "Home" => "index.md",
         "Usage" => "man/usage.md",
         "Propagators" => Any[
+            "propagators/index.md",
             "propagators/cowell.md",
             "propagators/gauss_ve.md",
             "propagators/edromo.md",

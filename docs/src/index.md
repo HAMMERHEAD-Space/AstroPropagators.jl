@@ -93,7 +93,7 @@ This documentation is organized as follows:
 
 - **[Usage Guide](man/usage.md)**: Comprehensive examples and tutorials
 - **[API Reference](man/api.md)**: Complete function and type documentation  
-- **[Propagators](propagators/)**: Detailed descriptions of each propagation method
+- **[Propagators](propagators/index.md)**: Detailed descriptions of each propagation method
 - **[Library Reference](lib/library.md)**: Auto-generated API documentation
 
 *Performance varies with orbit characteristics and force model complexity*
