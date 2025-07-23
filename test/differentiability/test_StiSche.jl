@@ -65,9 +65,7 @@ end
                 )
 
                 f_ad, df_ad = value_and_derivative(
-                    (x) -> Array(
-                        StiSche_EOM(Array(state), _p2, x, _model_list, config)
-                    ),
+                    (x) -> Array(StiSche_EOM(Array(state), _p2, x, _model_list, config)),
                     backend[2],
                     ϕ,
                 )

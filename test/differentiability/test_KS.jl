@@ -15,15 +15,11 @@
                 "Kustaanheimo-Stiefel Differentiability " * backend[1] * " " * time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_jacobian(
-                    (x) -> KS_EOM(x, _p2, ϕ, _model_list, config),
-                    AutoFiniteDiff(),
-                    state,
+                    (x) -> KS_EOM(x, _p2, ϕ, _model_list, config), AutoFiniteDiff(), state
                 )
 
                 f_ad, df_ad = value_and_jacobian(
-                    (x) -> Array(KS_EOM(x, _p2, ϕ, _model_list, config)),
-                    backend[2],
-                    state,
+                    (x) -> Array(KS_EOM(x, _p2, ϕ, _model_list, config)), backend[2], state
                 )
 
                 @test f_fd ≈ f_ad
@@ -57,19 +53,19 @@ end
         end
         for (time_type, state, config, ϕ) in time_types
             testname =
-                "Kustaanheimo-Stiefel Time Differentiability " * backend[1] * " " * time_type
+                "Kustaanheimo-Stiefel Time Differentiability " *
+                backend[1] *
+                " " *
+                time_type
             @testset "$testname" begin
                 f_fd, df_fd = value_and_derivative(
-                    (x) ->
-                        KS_EOM(Array(state), _p2, x, _model_list, config),
+                    (x) -> KS_EOM(Array(state), _p2, x, _model_list, config),
                     AutoFiniteDiff(),
                     ϕ,
                 )
 
                 f_ad, df_ad = value_and_derivative(
-                    (x) -> Array(
-                        KS_EOM(Array(state), _p2, x, _model_list, config),
-                    ),
+                    (x) -> Array(KS_EOM(Array(state), _p2, x, _model_list, config)),
                     backend[2],
                     ϕ,
                 )

@@ -101,6 +101,7 @@ function KS_EOM!(
     return nothing
 end
 
+
 function KS_matrix(u::AbstractVector)
     return SMatrix{4,4}(
         u[1],
