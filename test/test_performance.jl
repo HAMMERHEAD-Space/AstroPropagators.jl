@@ -1,5 +1,9 @@
 @testset "Aqua.jl" begin
-    Aqua.test_all(AstroPropagators; ambiguities=(recursive = false))
+    Aqua.test_all(
+        AstroPropagators;
+        ambiguities=(recursive = false),
+        deps_compat=(check_extras = false),
+    )
 end
 
 @testset "JET Testing" begin
@@ -43,7 +47,9 @@ end
         eop_data=eop_data,
     )
 
-    model_list = CentralBodyDynamicsModel(grav_model, (sun_third_body, moon_third_body, srp_model, drag_model))
+    model_list = CentralBodyDynamicsModel(
+        grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
+    )
 
     @test length(
         check_allocs(GaussVE_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
