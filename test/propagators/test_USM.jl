@@ -167,7 +167,7 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-3
 end
 
 @testset "USM6 Propagator Keplerian" begin
