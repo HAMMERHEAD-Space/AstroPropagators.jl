@@ -38,5 +38,31 @@ julia> Pkg.add("AstroPropagators")
 
 For more information, see the [documentation][docs-stable-url].
 
+## Citing
+
+If you use `AstroPropagators.jl` in your work, please consider citing it and `AstroForceModels.jl`.
+
+```bibtex
+@misc{AstroForceModels.jl,
+    author = {Murphy, Jordan},
+    title = {AstroForceModels.jl},
+    year = {2024},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroForceModels.jl}}
+}
+```
+
+```bibtex
+@misc{AstroPropagators.jl,
+    author = {Murphy, Jordan},
+    title = {AstroPropagators.jl},
+    year = {2024},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroPropagators.jl}}
+}
+```
+
 [docs-dev-url]: https://HAMMERHEAD-Space.github.io/AstroPropagators.jl/dev/
 [docs-stable-url]: https://HAMMERHEAD-Space.github.io/AstroPropagators.jl/dev/

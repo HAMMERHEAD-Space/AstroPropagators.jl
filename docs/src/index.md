@@ -109,16 +109,29 @@ We welcome contributions to AstroPropagators.jl! Whether you're:
 
 Please see our [contribution guidelines](https://github.com/jmurphy6895/AstroPropagators.jl/blob/master/CONTRIBUTING.md) and feel free to open issues or pull requests on [GitHub](https://github.com/jmurphy6895/AstroPropagators.jl).
 
-## Citation
+## Citing
 
-If you use AstroPropagators.jl in your research, please consider citing:
+If you use `AstroPropagators.jl` in your work, please consider citing it and `AstroForceModels.jl`.
 
 ```bibtex
-@software{astropropagators_jl,
-  title = {AstroPropagators.jl: High-Performance Orbital Propagation Methods},
-  author = {Jordan Murphy},
-  url = {https://github.com/jmurphy6895/AstroPropagators.jl},
-  year = {2024}
+@misc{AstroForceModels.jl,
+    author = {Murphy, Jordan},
+    title = {AstroForceModels.jl},
+    year = {2024},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroForceModels.jl}}
+}
+```
+
+```bibtex
+@misc{AstroPropagators.jl,
+    author = {Murphy, Jordan},
+    title = {AstroPropagators.jl},
+    year = {2024},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroPropagators.jl}}
 }
 ```
 
