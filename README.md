@@ -1,13 +1,12 @@
 # AstroPropagators
 
-## IMPORTANT NOTE: While the existing functions will work, for the most performance and differentiation capability, use one of the PR and instructions detailed there.
-
 [![CI](https://github.com/jmurphy6895/AstroPropagators.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/jmurphy6895/AstroPropagators.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![codecov](https://codecov.io/gh/jmurphy6895/AstroPropagators.jl/branch/main/graph/badge.svg?token=47G4OLV6PD)](https://codecov.io/gh/jmurphy6895/AstroPropagators.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)][docs-stable-url]
 [![](https://img.shields.io/badge/docs-dev-blue.svg)][docs-dev-url]
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![DOI](https://zenodo.org/badge/672594990.svg)](https://doi.org/10.5281/zenodo.16954455)
 
 ## Description
 
@@ -43,24 +42,28 @@ For more information, see the [documentation][docs-stable-url].
 If you use `AstroPropagators.jl` in your work, please consider citing it and `AstroForceModels.jl`.
 
 ```bibtex
-@misc{AstroForceModels.jl,
-    author = {Murphy, Jordan},
-    title = {AstroForceModels.jl},
-    year = {2024},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroForceModels.jl}}
+@software{jordan_murphy_2025_16954386,
+  author       = {Jordan Murphy},
+  title        = {HAMMERHEAD-Space/AstroForceModels.jl: v0.3.13},
+  month        = aug,
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {v0.3.13},
+  doi          = {10.5281/zenodo.16954386},
+  url          = {https://doi.org/10.5281/zenodo.16954386},
 }
 ```
 
 ```bibtex
-@misc{AstroPropagators.jl,
-    author = {Murphy, Jordan},
-    title = {AstroPropagators.jl},
-    year = {2024},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\\url{https://github.com/HAMMERHEAD-Space/AstroPropagators.jl}}
+@software{jordan_murphy_2025_16954456,
+  author       = {Jordan Murphy},
+  title        = {HAMMERHEAD-Space/AstroPropagators.jl: v0.1.4},
+  month        = aug,
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {v0.1.4},
+  doi          = {10.5281/zenodo.16954456},
+  url          = {https://doi.org/10.5281/zenodo.16954456},
 }
 ```
 
