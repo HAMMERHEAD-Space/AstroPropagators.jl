@@ -23,7 +23,7 @@ This project implements several propagation methods for the **AstroPropagators.j
     - [x] USMEM
 
 
-NOTE: Although the code for some of these are present, only the checked ones currently supported!
+NOTE: Although the code for some of these are present, only the checked ones supported!
 
 ## Installation
 
