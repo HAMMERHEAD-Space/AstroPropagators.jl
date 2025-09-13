@@ -9,7 +9,7 @@
 
 ## Description
 
-This project implements several propagation methods for the **AstroPropagators.jl** ecosystem using equations of motion for different orbital element sets. The force models can either be user-supplied or built up with the **AstroForceModels.jl** package. This package was inspired by the [THALASSA library](https://github.com/woodywu-arizona/thalassa). A full list of implemented propagators can be found below:
+This project implements several propagation methods using equations of motion for different orbital element sets. The force models can either be user-supplied or built up with the **AstroForceModels.jl** package. This package was inspired by the [THALASSA library](https://github.com/woodywu-arizona/thalassa). A full list of implemented propagators can be found below:
 
 - [x] Cowell
 - [x] Gauss Variational Equations
