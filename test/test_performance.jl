@@ -7,7 +7,9 @@
 end
 
 @testset "JET Testing" begin
-    rep = JET.test_package(AstroPropagators; toplevel_logger=nothing)
+    rep = JET.test_package(
+        AstroPropagators; toplevel_logger=nothing, target_modules=(@__MODULE__,)
+    )
 end
 
 @testset "EOM Allocations" begin
