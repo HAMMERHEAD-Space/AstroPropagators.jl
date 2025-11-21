@@ -6,6 +6,7 @@ export CowellPropagator,
     GaussVEPropagator,
     KSPropagator,
     MilankovichPropagator,
+    StiSchePropagator,
     USM7Propagator,
     USM6Propagator,
     USMEMPropagator
@@ -15,6 +16,7 @@ struct EDromoPropagator <: AbstractPropType end
 struct GaussVEPropagator <: AbstractPropType end
 struct KSPropagator <: AbstractPropType end
 struct MilankovichPropagator <: AbstractPropType end
+struct StiSchePropagator <: AbstractPropType end
 struct USM7Propagator <: AbstractPropType end
 struct USM6Propagator <: AbstractPropType end
 struct USMEMPropagator <: AbstractPropType end
@@ -45,6 +47,8 @@ function propagate(
             KS_EOM!(du, u, p, t, models, config)
         elseif prop_type == MilankovichPropagator()
             Milankovich_EOM!(du, u, p, t, models)
+        elseif prop_type == StiSchePropagator()
+            StiSche_EOM!(du, u, p, t, models, config)
         elseif prop_type == USM7Propagator()
             USM7_EOM!(du, u, p, t, models)
         elseif prop_type == USM6Propagator()
