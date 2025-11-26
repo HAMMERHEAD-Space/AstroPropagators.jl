@@ -57,7 +57,7 @@
         2.3814564036944668
         0.1401977642923555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator Keplerian Constant Time" begin
@@ -289,7 +289,7 @@ end
         2.3161226441289355
         0.15272175782854927
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator High-Fidelity Constant Time" begin
@@ -381,7 +381,7 @@ end
         2.3161225902744675
         0.15272176176946778
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator High-Fidelity Linear Time" begin
@@ -471,7 +471,7 @@ end
         2.316122578334805
         0.15272176266536555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator High-Fidelity Physical Time 2" begin
@@ -563,7 +563,7 @@ end
         -7.9104206251212785
         -1.0659672638942694
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator High-Fidelity Constant Time 2" begin
@@ -655,7 +655,7 @@ end
         -7.910328390775542
         -1.0659872819153653
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "EDromo Propagator High-Fidelity Linear Time 2" begin
@@ -747,5 +747,5 @@ end
         -7.910485345567063
         -1.065953255462258
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end

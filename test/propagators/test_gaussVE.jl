@@ -102,7 +102,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test Cartesian(Keplerian(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-2
+    @test Cartesian(Keplerian(sol.u[end]), p.μ) ≈ expected_end rtol=1e-2
 end
 
 @testset "Gauss Variational Equations Propagator High-Fidelity 2" begin
@@ -169,5 +169,5 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test Cartesian(Keplerian(sol.u[end]), p.μ) ≈ expected_end rtol = 2e0
+    @test Cartesian(Keplerian(sol.u[end]), p.μ) ≈ expected_end rtol=2e0
 end

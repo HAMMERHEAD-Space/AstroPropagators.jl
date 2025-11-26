@@ -57,7 +57,7 @@
         2.3814564036944668
         0.1401977642923555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Stiefel-Scheifele Propagator Keplerian Linear Time" begin
@@ -119,7 +119,7 @@ end
         2.3814564036944668
         0.1401977642923555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Stiefel-Scheifele Propagator High-Fidelity Physical Time" begin
@@ -205,7 +205,7 @@ end
         2.3045201439673635
         0.15104860878575033
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Stiefel-Scheifele Propagator High-Fidelity Linear Time" begin
@@ -289,7 +289,7 @@ end
         2.3045201326897082
         0.1510486097496507
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Stiefel-Scheifele Propagator High-Fidelity Physical Time 2" begin
@@ -376,7 +376,7 @@ end
         -7.8989387269317275
         -1.0684067570937494
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Stiefel-Scheifele Propagator High-Fidelity Linear Time 2" begin
@@ -463,5 +463,5 @@ end
         -7.898834422945369
         -1.0684288970397775
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end

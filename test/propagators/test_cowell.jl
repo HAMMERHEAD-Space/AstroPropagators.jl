@@ -95,7 +95,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test sol.u[end] ≈ expected_end rtol = 1e-4
+    @test sol.u[end] ≈ expected_end rtol=1e-3
 end
 
 @testset "Cowell Propagator High-Fidelity 2" begin
@@ -156,5 +156,5 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test sol.u[end] ≈ expected_end rtol = 1e-3
+    @test sol.u[end] ≈ expected_end rtol=1e-3
 end

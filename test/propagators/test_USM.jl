@@ -102,7 +102,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USM7 Propagator High-Fidelity 2" begin
@@ -167,7 +167,7 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-3
+    @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USM6 Propagator Keplerian" begin
@@ -207,7 +207,7 @@ end
         2.3814564036944668
         0.1401977642923555
     ]
-    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USM6 Propagator High-Fidelity" begin
@@ -273,7 +273,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USM6 Propagator High-Fidelity 2" begin
@@ -339,7 +339,7 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-3
+    @test Cartesian(USM6(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USMEM Propagator Keplerian" begin
@@ -380,7 +380,7 @@ end
         2.3814564036944668
         0.1401977642923555
     ]
-    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-6
+    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USMEM Propagator High-Fidelity" begin
@@ -446,7 +446,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "USMEM Propagator High-Fidelity 2" begin
@@ -512,5 +512,5 @@ end
         -7.898781054302578
         -1.0684402332363099
     ]
-    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(USMEM(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end

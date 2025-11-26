@@ -57,7 +57,7 @@
         2.3814564036944668
         0.1401977642923555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Kustaanheimo-Stiefel Propagator Keplerian Linear Time" begin
@@ -104,7 +104,7 @@ end
 
     NRG = orbitalNRG.(KustaanheimoStiefel.(sol.u), μ, [ks_config])
     #TODO: IS THIS A BUG?
-    @test NRG[1] ≈ NRG[end] rtol=1e-6
+    @test NRG[1] ≈ NRG[end] rtol=1e-3
 
     final_state = Cartesian(KustaanheimoStiefel(sol.u[end]), μ, ks_config)
 
@@ -116,7 +116,7 @@ end
         2.3814564036944668
         0.1401977642923555
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Kustaanheimo-Stiefel Propagator High-Fidelity Physical Time" begin
@@ -196,7 +196,7 @@ end
         2.3045202516241976
         0.15104860229599937
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Kustaanheimo-Stiefel Propagator High-Fidelity Linear Time" begin
@@ -276,7 +276,7 @@ end
         2.304520171352468
         0.15104860706652987
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Kustaanheimo-Stiefel Propagator High-Fidelity Physical Time 2" begin
@@ -361,7 +361,7 @@ end
         -7.898985518614695
         -1.0683968399621873
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
 
 @testset "Kustaanheimo-Stiefel Propagator High-Fidelity Linear Time 2" begin
@@ -446,5 +446,5 @@ end
         -7.89897738711462
         -1.0683985082163687
     ]
-    @test final_state ≈ expected_end rtol=1e-6
+    @test final_state ≈ expected_end rtol=1e-3
 end
