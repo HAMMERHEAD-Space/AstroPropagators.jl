@@ -82,7 +82,7 @@ end
         potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(μ=μ))
     )
     stische_config = RegularizedCoordinateConfig(
-        u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime()
+        u0_cart, μ; W=W, t₀=0.0, flag_time=LinearTime()
     )
 
     p_full = ComponentVector(; p..., μ=μ)

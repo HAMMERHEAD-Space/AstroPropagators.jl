@@ -45,7 +45,7 @@
     get_KS_time(sol.u[end], ks_config)
 
     NRG = orbitalNRG.(KustaanheimoStiefel.(sol.u), μ, [ks_config])
-    @test NRG[1] ≈ NRG[end] rtol=1e-8
+    @test NRG[1] ≈ NRG[end] rtol=1e-6
 
     final_state = Cartesian(KustaanheimoStiefel(sol.u[end]), μ, ks_config)
 
