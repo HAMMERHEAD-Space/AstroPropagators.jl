@@ -41,11 +41,8 @@ If you use `AstroPropagators.jl` in your work, please consider citing it and `As
 ```bibtex
 @software{jordan_murphy_2025_16954386,
   author       = {Jordan Murphy},
-  title        = {HAMMERHEAD-Space/AstroForceModels.jl: v0.3.13},
-  month        = aug,
-  year         = 2025,
+  title        = {HAMMERHEAD-Space/AstroForceModels.jl},
   publisher    = {Zenodo},
-  version      = {v0.3.13},
   doi          = {10.5281/zenodo.16954386},
   url          = {https://doi.org/10.5281/zenodo.16954386},
 }
@@ -54,11 +51,8 @@ If you use `AstroPropagators.jl` in your work, please consider citing it and `As
 ```bibtex
 @software{jordan_murphy_2025_16954456,
   author       = {Jordan Murphy},
-  title        = {HAMMERHEAD-Space/AstroPropagators.jl: v0.1.4},
-  month        = aug,
-  year         = 2025,
+  title        = {HAMMERHEAD-Space/AstroPropagators.jl},
   publisher    = {Zenodo},
-  version      = {v0.1.4},
   doi          = {10.5281/zenodo.16954456},
   url          = {https://doi.org/10.5281/zenodo.16954456},
 }
