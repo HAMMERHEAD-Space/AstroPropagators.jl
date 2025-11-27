@@ -1,32 +1,36 @@
-export KS_EOM, KS_EOM!
-export KS_time_condition, end_KS_integration, impulsive_burn_ks!, KS_burn
+export StiSche_EOM, StiSche_EOM!
+export StiSche_time_condition,
+    end_StiSche_integration, impulsive_burn_stische!, StiSche_burn
 
-function KS_EOM(
+function StiSche_EOM(
     u::AbstractArray,
     p::ComponentVector,
     ϕ::Number,
     models::AbstractDynamicsModel,
     config::RegularizedCoordinateConfig,
 )
-    KSp1, KSp2, KSp3, KSp4, KSv1, KSv2, KSv3, KSv4, h, τ = u
+    α1, α2, α3, α4, β1, β2, β3, β4, ω, _ = u
     μ::Number = p.μ
 
     # Extract parameters from config
     DU, TU = config.DU, config.TU
 
     ##################################################
-    #* 1. Auxiliary Quantities
+    #* 1. Auxiliary Quantities (1)
     ##################################################
-    KSp = SVector{4}(KSp1, KSp2, KSp3, KSp4)
-    KSv = SVector{4}(KSv1, KSv2, KSv3, KSv4)
-    r_mag = KSp1^2 + KSp2^2 + KSp3^2 + KSp4^2
-    L = KS_matrix(KSp)
+    sϕ2, cϕ2 = sincos(0.5 * ϕ)
+    α = SVector{4}(α1, α2, α3, α4)
+    β = SVector{4}(β1, β2, β3, β4)
 
     ##################################################
-    #* 2. Cartesian State and Time
+    #* 2. Position and Time in Inertial Frame
     ##################################################
-    u_cart = Cartesian(KustaanheimoStiefel(u), μ, config)
-    tt = get_KS_time(u, config)
+    KSp = α * cϕ2 + β * sϕ2
+    KSv = 0.5 * (-α * sϕ2 + β * cϕ2)
+    r_mag = dot(KSp, KSp)
+
+    u_cart = Cartesian(StiefelScheifele(u), μ, ϕ, config)
+    tt = get_stiefelscheifele_time(u, ϕ, config)
 
     ##################################################
     #* 3. Potential Based Perturbations
@@ -52,43 +56,39 @@ function KS_EOM(
         (TU^2 / DU)
 
     ##################################################
-    #* 5. Equations of Motion
+    #* 5. Auxiliary Quantities (2)
     ##################################################
-    # Total perturbation in R^4
-    F_4d = SVector{4}(
-        ∇Uᵣ_inertial[1] + p_inertial[1],
-        ∇Uᵣ_inertial[2] + p_inertial[2],
-        ∇Uᵣ_inertial[3] + p_inertial[3],
-        0.0,
-    )
     p_inertial_4d = SVector{4}(p_inertial[1], p_inertial[2], p_inertial[3], 0.0)
+    Lp = KS_matrix(KSp)' * p_inertial_4d
 
-    # Derivatives
-    dKSp = KSv
-    dKSv = -0.5 * (KSp * (h + U) - r_mag * (L' * F_4d))
-    dh = -r_mag * ∇Uₜ - 2.0 * dot(KSv, L' * p_inertial_4d)
+    ∇Uᵣ_inertial_4d = SVector{4}(∇Uᵣ_inertial[1], ∇Uᵣ_inertial[2], ∇Uᵣ_inertial[3], 0.0)
+    ∇U_u = -2.0 * KS_matrix(KSp)' * ∇Uᵣ_inertial_4d
+
+    ##################################################
+    #* 6. Equations of Motion
+    ##################################################
+    dω = -r_mag / (8.0 * ω^2) * ∇Uₜ - (0.5 / ω) * dot(KSv, Lp)
+
+    aux =
+        (0.5 / ω^2) * (0.5 * U * KSp + r_mag / 4.0 * (∇U_u - 2.0 * Lp)) + 2.0 / ω * dω * KSv
+
+    dα = aux * sϕ2
+    dβ = -aux * cϕ2
 
     if config.flag_time isa PhysicalTime
-        dτ = r_mag
+        dτ = 0.5 * r_mag / ω
     elseif config.flag_time isa LinearTime
         μ_non_dim = μ * TU^2 / DU^3
-        lte1 = (μ_non_dim - 2.0 * r_mag * U) / (2.0 * h)
-        lte20 = 2.0 * (L' * -F_4d)
-        lte2 = (r_mag / (4.0 * h)) * dot(KSp, lte20)
-        lte3 = dh / (h^2) * dot(KSp, KSv)
+        lte1 = (μ_non_dim - 2.0 * r_mag * U) / (8.0 * ω^3)
+        lte2 = (r_mag / (16.0 * ω^3)) * dot(KSp, ∇U_u - 2.0 * Lp)
+        lte3 = (2.0 / ω^2) * dω * dot(KSp, KSv)
         dτ = lte1 - lte2 - lte3
-    else
-        error(
-            "Time flag in RegularizedCoordinateConfig not supported by Kustaanheimo-Stiefel formulation.",
-        )
     end
 
-    return SVector{10}(
-        dKSp[1], dKSp[2], dKSp[3], dKSp[4], dKSv[1], dKSv[2], dKSv[3], dKSv[4], dh, dτ
-    )
+    return SVector{10}(dα[1], dα[2], dα[3], dα[4], dβ[1], dβ[2], dβ[3], dβ[4], dω, dτ)
 end
 
-function KS_EOM!(
+function StiSche_EOM!(
     du::AbstractArray,
     u::AbstractArray,
     p::ComponentVector,
@@ -96,107 +96,89 @@ function KS_EOM!(
     models::AbstractDynamicsModel,
     config::RegularizedCoordinateConfig,
 )
-    du .= KS_EOM(u, p, ϕ, models, config)
-
+    du .= StiSche_EOM(u, p, ϕ, models, config)
     return nothing
 end
 
-function KS_matrix(u::AbstractVector)
-    return SMatrix{4,4}(
-        u[1],
-        u[2],
-        u[3],
-        u[4],
-        -u[2],
-        u[1],
-        u[4],
-        -u[3],
-        -u[3],
-        -u[4],
-        u[1],
-        u[2],
-        u[4],
-        -u[3],
-        u[2],
-        -u[1],
-    )
-end
-
 """
-    KS_time_condition(u, ϕ, integrator, config; event_time=0.0)
+    StiSche_time_condition(u, ϕ, integrator, config; event_time=0.0)
 
 Event function for `DifferentialEquations.jl` callbacks which triggers
 when the current integration time equals a specified `event_time`.
 
 """
-function KS_time_condition(
+function StiSche_time_condition(
     u::AbstractVector,
     ϕ::Number,
     integrator::T,
     config::RegularizedCoordinateConfig;
     event_time::Number=0.0,
 ) where {T<:SciMLBase.DEIntegrator}
-    t = get_KS_time(u, config)
+    t = get_stiefelscheifele_time(u, ϕ, config)
     return t - event_time
 end
 
 """
-    end_KS_integration(stop_time, config)
+    end_StiSche_integration(stop_time, config)
 
 Returns a `ContinuousCallback` which terminates a `DifferentialEquations.jl`
 integration when the current time equals `event_time`.
 
 """
-function end_KS_integration(stop_time::Number, config::RegularizedCoordinateConfig)
+function end_StiSche_integration(stop_time::Number, config::RegularizedCoordinateConfig)
     ContinuousCallback(
         (u, ϕ, integrator) ->
-            KS_time_condition(u, ϕ, integrator, config; event_time=stop_time),
+            StiSche_time_condition(u, ϕ, integrator, config; event_time=stop_time),
         (integrator) -> terminate!(integrator);
     )
 end
 
 """
-    impulsive_burn_ks!(integrator, ΔV, config)
+    impulsive_burn_stische!(integrator, ΔV, config)
 
-Applies an impulsive maneuver `ΔV` to a KS state within a
+Applies an impulsive maneuver `ΔV` to a Stiefel-Scheifele state within a
 `DifferentialEquations.jl` integrator.
 
 """
-function impulsive_burn_ks!(
+function impulsive_burn_stische!(
     integrator::T, ΔV::AbstractVector, config::RegularizedCoordinateConfig
 ) where {T<:SciMLBase.DEIntegrator}
     # Pass phi separately to coordinate transformations
-    cart_state = Cartesian(KustaanheimoStiefel(integrator.u), integrator.p.μ, config)
+    cart_state = Cartesian(
+        StiefelScheifele(integrator.u), integrator.p.μ, integrator.t, config
+    )
 
     new_state = cart_state + SVector{6}(0, 0, 0, ΔV[1], ΔV[2], ΔV[3])
     new_cart_state = Cartesian(new_state...)
 
-    t_maneuver = get_KS_time(integrator.u, config)
+    t_maneuver = get_stiefelscheifele_time(integrator.u, integrator.t, config)
 
     # Create new config for the maneuver with updated t₀
     maneuver_config = RegularizedCoordinateConfig(
         config.DU, config.TU, config.W, t_maneuver, config.flag_time
     )
 
-    # Convert back to KS using the phi from the maneuver time
+    # Convert back to Stiefel-Scheifele using the phi from the maneuver time
     integrator.u = params(
-        KustaanheimoStiefel(new_cart_state, integrator.p.μ, maneuver_config)
+        StiefelScheifele(new_cart_state, integrator.p.μ, integrator.t, maneuver_config)
     )
 
     return nothing
 end
 
 """
-    KS_burn(burn_time, ΔV, config)
+    StiSche_burn(burn_time, ΔV, config)
 
-Returns a `ContinuousCallback` which triggers an `impulsive_burn_ks!`
+Returns a `ContinuousCallback` which triggers an `impulsive_burn_stische!`
 maneuver at a specified `burn_time`.
 
 """
-function KS_burn(burn_time::Number, ΔV::AbstractVector, config::RegularizedCoordinateConfig)
+function StiSche_burn(
+    burn_time::Number, ΔV::AbstractVector, config::RegularizedCoordinateConfig
+)
     ContinuousCallback(
         (u, ϕ, integrator) ->
-            KS_time_condition(u, ϕ, integrator, config; event_time=burn_time),
-        (integrator) -> impulsive_burn_ks!(integrator, ΔV, config),
+            StiSche_time_condition(u, ϕ, integrator, config; event_time=burn_time),
+        (integrator) -> impulsive_burn_stische!(integrator, ΔV, config),
     )
 end

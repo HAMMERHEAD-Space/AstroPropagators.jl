@@ -46,7 +46,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "USM7 Parameter Differntiability" begin
+@testset "USM7 Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -77,7 +77,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "USM7 Differntiability " * backend[1]
+        testname = "USM7 Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]
@@ -142,7 +142,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "USM6 Parameter Differntiability" begin
+@testset "USM6 Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -173,7 +173,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "USM6 Differntiability " * backend[1]
+        testname = "USM6 Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]
@@ -238,7 +238,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "USMEM Parameter Differntiability" begin
+@testset "USMEM Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -269,7 +269,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "USMEM Differntiability " * backend[1]
+        testname = "USMEM Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]

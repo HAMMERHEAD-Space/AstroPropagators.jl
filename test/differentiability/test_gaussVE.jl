@@ -1,7 +1,7 @@
-@testset "Gauss VE State Differntiability" begin
+@testset "Gauss VE State Differentiability" begin
     SpaceIndices.init()
     for backend in _BACKENDS
-        testname = "Gauss VE Differntiability " * backend[1]
+        testname = "Gauss VE Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> GaussVE_EOM(x, _p2, _t, _model_list),
@@ -22,10 +22,10 @@
     SpaceIndices.destroy()
 end
 
-@testset "Gauss VE Time Differntiability" begin
+@testset "Gauss VE Time Differentiability" begin
     SpaceIndices.init()
     for backend in _BACKENDS
-        testname = "Gauss VE Differntiability " * backend[1]
+        testname = "Gauss VE Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_derivative(
                 (x) -> GaussVE_EOM(Array(_state_koe), _p2, x, _model_list),
@@ -46,7 +46,7 @@ end
     SpaceIndices.destroy()
 end
 
-@testset "Gauss VE Parameter Differntiability" begin
+@testset "Gauss VE Parameter Differentiability" begin
     SpaceIndices.init()
 
     function dynamics_params(x::AbstractArray{T}) where {T<:Number}
@@ -77,7 +77,7 @@ end
                 "Enzyme", AutoEnzyme(; mode=Enzyme.set_runtime_activity(Enzyme.Forward))
             )
         end
-        testname = "Gauss VE Differntiability " * backend[1]
+        testname = "Gauss VE Differentiability " * backend[1]
         @testset "$testname" begin
             f_fd, df_fd = value_and_jacobian(
                 (x) -> Array(dynamics_params(x)), AutoFiniteDiff(), [0.2; 0.2]

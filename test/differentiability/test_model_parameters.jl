@@ -10,13 +10,35 @@ const _state = [
     -3.3123476319597557
     -1.1880157328553503
 ] #km, km/s
-
 const _μ = 398600.4418
+
+const _config_pt = RegularizedCoordinateConfig(
+    _state, _μ; W=-1e-2, t₀=0.0, flag_time=PhysicalTime()
+)
+const _config_ct = RegularizedCoordinateConfig(
+    _state, _μ; W=-1e-2, t₀=0.0, flag_time=ConstantTime()
+)
+const _config_lt = RegularizedCoordinateConfig(
+    _state, _μ; W=-1e-2, t₀=0.0, flag_time=LinearTime()
+)
+
+# Compute initial phi values for EDromo transformations
+const _ϕ_pt = AstroCoords.compute_initial_phi(_state, _μ, _config_pt)
+const _ϕ_ct = AstroCoords.compute_initial_phi(_state, _μ, _config_ct)
+const _ϕ_lt = AstroCoords.compute_initial_phi(_state, _μ, _config_lt)
+
 const _state_koe = Array(Keplerian(Cartesian(_state), _μ))
 const _state_mil = Array(Milankovich(Cartesian(_state), _μ))
 const _state_usm7 = Array(USM7(Cartesian(_state), _μ))
 const _state_usm6 = Array(USM6(Cartesian(_state), _μ))
 const _state_usmem = Array(USMEM(Cartesian(_state), _μ))
+const _state_edromo_pt = Array(EDromo(Cartesian(_state), _μ, _ϕ_pt, _config_pt))
+const _state_edromo_ct = Array(EDromo(Cartesian(_state), _μ, _ϕ_ct, _config_ct))
+const _state_edromo_lt = Array(EDromo(Cartesian(_state), _μ, _ϕ_lt, _config_lt))
+const _state_ks_pt = Array(KustaanheimoStiefel(Cartesian(_state), _μ, _config_pt))
+const _state_ks_lt = Array(KustaanheimoStiefel(Cartesian(_state), _μ, _config_lt))
+const _state_stische_pt = Array(StiefelScheifele(Cartesian(_state), _μ, _ϕ_pt, _config_pt))
+const _state_stische_lt = Array(StiefelScheifele(Cartesian(_state), _μ, _ϕ_lt, _config_lt))
 
 const _eop_data = fetch_iers_eop()
 const _grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))

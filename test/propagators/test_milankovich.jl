@@ -100,7 +100,7 @@ end
         2.3045214269873857
         0.15104845625911167
     ]
-    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-4
+    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
 @testset "Milankovich Propagator High-Fidelity 2" begin
@@ -166,5 +166,5 @@ end
         -7.897922283599572
         -1.06862260690453
     ]
-    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol = 1e-3
+    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end

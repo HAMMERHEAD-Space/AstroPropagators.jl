@@ -13,17 +13,15 @@ This project implements several propagation methods using equations of motion fo
 
 - [x] Cowell
 - [x] Gauss Variational Equations
-- [ ] EDromo
-- [ ] Kustaanheimo-Stiefel
+- [x] EDromo
+- [x] Kustaanheimo-Stiefel
 - [x] Milankovich
-- [ ] Stiefel-Scheifel
+- [x] Stiefel-Scheifel
 - [X] Unified State Model
     - [x] USM7
     - [x] USM6
     - [x] USMEM
-
-
-NOTE: Although the code for some of these are present, only the checked ones supported! They are supported in the draft PR branch and will need other branches from other repos to work.
+- [ ] GEqOE
 
 ## Installation
 
