@@ -1,7 +1,7 @@
 name = "AstroPropagators"
 uuid = "7f2154ff-9684-4686-a457-9182f50d0f5b"
 authors = ["Jordan Murphy"]
-version = "0.1.3"
+version = "0.2.0"
 
 [deps]
 AstroCoords = "27fb9038-6a9d-4e07-8d5d-d0805b53c4cb"
