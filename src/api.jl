@@ -24,7 +24,7 @@ struct USMEMPropagator <: AbstractPropType end
 function propagate(
     u0::AbstractArray{UT},
     p::ComponentArray,
-    models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
+    models::AstroForceModels.AbstractDynamicsModel,
     tspan::Tuple{TT,TT};
     prop_type::AbstractPropType=CowellPropagator(),
     config::Union{RegularizedCoordinateConfig,Nothing}=nothing,
