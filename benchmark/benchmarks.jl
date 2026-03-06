@@ -215,46 +215,36 @@ const _u0_geqoe = Array(GEqOE(Cartesian(_state_cart), _μ_full, _config_geqoe_pr
 
 # --- Standard propagators ---
 SUITE["propagation"]["Cowell"] = @benchmarkable propagate(
-    $_u0_cowell, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=CowellPropagator(),
+    CowellPropagator(), $_u0_cowell, $_p_full, $_dynamics_full, $_tspan
 )
 SUITE["propagation"]["GaussVE"] = @benchmarkable propagate(
-    $_u0_gaussve, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=GaussVEPropagator(),
+    GaussVEPropagator(), $_u0_gaussve, $_p_full, $_dynamics_full, $_tspan
 )
 SUITE["propagation"]["Milankovich"] = @benchmarkable propagate(
-    $_u0_milankovich, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=MilankovichPropagator(),
+    MilankovichPropagator(), $_u0_milankovich, $_p_full, $_dynamics_full, $_tspan
 )
 SUITE["propagation"]["USM7"] = @benchmarkable propagate(
-    $_u0_usm7, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=USM7Propagator(),
+    USM7Propagator(), $_u0_usm7, $_p_full, $_dynamics_full, $_tspan
 )
 SUITE["propagation"]["USM6"] = @benchmarkable propagate(
-    $_u0_usm6, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=USM6Propagator(),
+    USM6Propagator(), $_u0_usm6, $_p_full, $_dynamics_full, $_tspan
 )
 SUITE["propagation"]["USMEM"] = @benchmarkable propagate(
-    $_u0_usmem, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=USMEMPropagator(),
+    USMEMPropagator(), $_u0_usmem, $_p_full, $_dynamics_full, $_tspan
 )
 
 # --- Regularized propagators ---
 SUITE["propagation"]["EDromo"] = @benchmarkable propagate(
-    $_u0_edromo, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=EDromoPropagator(), config=$_config_prop,
+    EDromoPropagator(), $_u0_edromo, $_p_full, $_dynamics_full, $_tspan, $_config_prop
 )
 SUITE["propagation"]["KS"] = @benchmarkable propagate(
-    $_u0_ks, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=KSPropagator(), config=$_config_prop,
+    KSPropagator(), $_u0_ks, $_p_full, $_dynamics_full, $_tspan, $_config_prop
 )
 SUITE["propagation"]["StiSche"] = @benchmarkable propagate(
-    $_u0_stische, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=StiSchePropagator(), config=$_config_prop,
+    StiSchePropagator(), $_u0_stische, $_p_full, $_dynamics_full, $_tspan, $_config_prop
 )
 SUITE["propagation"]["GEqOE"] = @benchmarkable propagate(
-    $_u0_geqoe, $_p_full, $_dynamics_full, $_tspan;
-    prop_type=GEqOEPropagator(), config=$_config_geqoe_prop,
+    GEqOEPropagator(), $_u0_geqoe, $_p_full, $_dynamics_full, $_tspan, $_config_geqoe_prop
 )
 
 # ---------------------

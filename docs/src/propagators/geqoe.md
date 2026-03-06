@@ -66,36 +66,31 @@ config = RegularizedCoordinateConfig(; W=W)
 
 ## Usage Examples
 
-### Basic Orbital Propagation
+!!! note "Physical time"
+    Unlike EDromo, K-S, and Stiefel-Scheifele, GEqOE integrates in **physical
+    time** — no fictitious-time callback is needed. The `tspan` argument is
+    directly in seconds.
+
+### Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEqAdamsBashforthMoulton
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial Cartesian state [km, km/s]
-u0_cart = [-1076.225, -6765.896, -332.309, 9.357, -3.312, -1.188]
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-# Parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-μ = 398600.4418
-p = ComponentVector(; JD=JD, μ=μ)
-
-# Force model
 grav_model = KeplerianGravityAstroModel()
-model_list = CentralBodyDynamicsModel(grav_model)
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+tspan = (0.0, 86400.0)
 
-# Configuration (W = 0 for Keplerian)
 config = RegularizedCoordinateConfig(; W=0.0)
+u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
 
-# Convert to GEqOE
-u0_geqoe = Array(GEqOE(Cartesian(u0_cart), μ, config))
-
-# Propagate
-EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
-prob = ODEProblem(EOM!, u0_geqoe, (0.0, 86400.0), p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = propagate(GEqOEPropagator(), u0, p, models, tspan, config)
 
 # Convert back to Cartesian
 final_cart = Cartesian(GEqOE(sol.u[end]), μ, config)
@@ -104,31 +99,64 @@ final_cart = Cartesian(GEqOE(sol.u[end]), μ, config)
 ### High-Fidelity Propagation
 
 ```julia
-# Gravity model with J2+ harmonics
-grav_model = GravityHarmonicsAstroModel(;
-    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36
-)
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
 
-# Third-body and surface forces
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
+)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
+
 sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
 moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
-srp_model = SRPAstroModel(; satellite_srp_model=CannonballFixedSRP(0.2), ...)
-drag_model = DragAstroModel(; satellite_drag_model=CannonballFixedDrag(0.2), ...)
-
-model_list = CentralBodyDynamicsModel(
-    grav_model, (sun_model, moon_model, srp_model, drag_model)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
 )
 
-# Compute initial perturbing potential
-W = potential(Cartesian(u0_cart), p, 0.0, grav_model) -
-    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
-config = RegularizedCoordinateConfig(; W=W)
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+tspan = (0.0, 86400.0)
 
-# Convert and propagate
-u0_geqoe = Array(GEqOE(Cartesian(u0_cart), μ, config))
-EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
-prob = ODEProblem(EOM!, u0_geqoe, (0.0, 86400.0), p)
+W = (
+    potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+)
+config = RegularizedCoordinateConfig(; W=W)
+u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
+
+sol = propagate(GEqOEPropagator(), u0, p, models, tspan, config)
+```
+
+### Using `ODEProblem` Directly
+
+```julia
+using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+
+# Using the same force model and config setup from above...
+u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
+
+f!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, models, config)
+
+prob = ODEProblem(f!, u0, tspan, p)
 sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+
+# Convert back to Cartesian
+final_cart = Cartesian(GEqOE(sol.u[end]), μ, config)
 ```
 
 ## Performance Characteristics

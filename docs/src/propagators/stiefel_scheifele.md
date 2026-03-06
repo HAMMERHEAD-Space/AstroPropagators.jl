@@ -13,43 +13,114 @@ The Stiefel-Scheifele method employs:
 
 
 
-## Usage Example
+## Usage Examples
+
+!!! note "Fictitious time"
+    Stiefel-Scheifele integrates in a fictitious time variable `ϕ`, not physical
+    time `t`. The `tspan` argument is therefore the range of `ϕ`, and a
+    `ContinuousCallback` (via `end_StiSche_integration`) terminates the integration
+    when the desired physical time is reached.
+
+### Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEq
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial conditions (works for any eccentricity)
-r0 = [6378.137 + 500, 0.0, 0.0]  # Position [km]
-v0 = [0.0, 9.5, 0.0]             # Velocity [km/s] (hyperbolic)
-u0_cart = [r0; v0]
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-# Create RegularizedCoordinateConfig from state
-μ = 3.986004415e5  # km³/s²
-config = RegularizedCoordinateConfig(u0_cart, μ; flag_time=PhysicalTime())
-
-# Convert to Stiefel-Scheifele elements
-u0_ss = cart2StiefelScheifele(u0_cart, μ, 0.0, config)
-
-# Parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-p = ComponentVector(JD=JD, μ=μ)
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
 
-# Force models
-gravity_model = KeplerianGravityAstroModel(μ=μ)
-models = DynamicsModel(gravity_model)
+W = (
+    potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+)
+config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
 
-# Create ODE problem using Stiefel-Scheifele EOM
-function dynamics!(du, u, p, t)
-    StiefelScheifele_EOM!(du, u, p, t, models, config)
-end
+ϕ₀ = compute_initial_phi(u0_cart, μ, config)
+u0 = Array(StiefelScheifele(Cartesian(u0_cart), μ, ϕ₀, config))
+tspan = (ϕ₀, ϕ₀ + 6π)
 
-prob = ODEProblem(dynamics!, u0_ss, (0.0, 86400.0), p)
-sol = solve(prob, Vern8(), abstol=1e-12, reltol=1e-12)
+sol = propagate(
+    StiSchePropagator(), u0, p, models, tspan, config;
+    callback=end_StiSche_integration(86400.0, config),
+)
+```
 
-println("Stiefel-Scheifele propagation completed")
+### High-Fidelity Propagation
+
+```julia
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
+)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
+
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
+
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+
+W = (
+    potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+)
+config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
+
+ϕ₀ = compute_initial_phi(u0_cart, μ, config)
+u0 = Array(StiefelScheifele(Cartesian(u0_cart), μ, ϕ₀, config))
+tspan = (ϕ₀, ϕ₀ + 6π)
+
+sol = propagate(
+    StiSchePropagator(), u0, p, models, tspan, config;
+    callback=end_StiSche_integration(86400.0, config),
+)
+```
+
+### Using `ODEProblem` Directly
+
+```julia
+using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+
+# Using the same force model and config setup from above...
+ϕ₀ = compute_initial_phi(u0_cart, μ, config)
+u0 = Array(StiefelScheifele(Cartesian(u0_cart), μ, ϕ₀, config))
+tspan = (ϕ₀, ϕ₀ + 6π)
+
+f!(du, u, p, t) = StiSche_EOM!(du, u, p, t, models, config)
+
+prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(
+    prob, VCABM();
+    abstol=1e-13, reltol=1e-13,
+    callback=end_StiSche_integration(86400.0, config),
+)
 ```
 ## Applications
 

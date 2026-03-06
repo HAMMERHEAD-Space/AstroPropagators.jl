@@ -41,35 +41,87 @@ This results in a 6-dimensional state vector `[rx, ry, rz, vx, vy, vz]` that is 
 
 ## Usage Examples
 
-### Basic Orbital Propagation
+### Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEq
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial state (ISS-like orbit in km and km/s)
-u0 = [6378.137 + 408, 0.0, 0.0, 0.0, 7.660, 0.0] # km, km/s
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-# Simulation parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-p = ComponentVector(JD=JD)
-tspan = (0.0, 86400.0)  # 24 hours
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+tspan = (0.0, 86400.0)
 
-# Define force models
-gravity_model = KeplerianGravityAstroModel(μ=3.986004415e5)
-models = DynamicsModel(gravity_model)
-
-# Create ODE problem using Cowell EOM
-dynamics!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
-
-prob = ODEProblem(dynamics!, u0, tspan, p)
-sol = solve(prob, Vern8(), abstol=1e-12, reltol=1e-12)
-
-println("Final position: $(sol.u[end][1:3]) km")
-println("Final velocity: $(sol.u[end][4:6]) km/s")
+sol = propagate(CowellPropagator(), u0_cart, p, models, tspan)
 ```
+
+### High-Fidelity Propagation
+
+```julia
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
+)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
+
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
+
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+tspan = (0.0, 86400.0)
+
+sol = propagate(CowellPropagator(), u0_cart, p, models, tspan)
+```
+
+### Using `ODEProblem` Directly
+
+For full control over the integration — custom callbacks, event handling, or composing
+the EOM closure into a larger system — you can bypass `propagate` and build the
+`ODEProblem` yourself.
+
+```julia
+using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+
+# Using the same force model setup from above...
+
+# Build the EOM closure — captures models (and config for regularized propagators)
+f!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
+
+# Or equivalently, through the dispatch layer:
+# f!(du, u, p, t) = eom!(CowellPropagator(), du, u, p, t, models)
+
+prob = ODEProblem(f!, u0_cart, tspan, p)
+sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+```
+
+This is exactly what `propagate` does internally, so the two approaches produce
+identical results.
 
 ## Optimal Use Cases
 - **High-precision applications**: Precise orbit determination, collision analysis

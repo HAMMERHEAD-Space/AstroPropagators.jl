@@ -47,49 +47,78 @@ The method uses the RTN (Radial-Tangential-Normal) coordinate system:
 
 ## Usage Examples
 
-### Basic Perturbed Orbit Propagation
+### Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEq
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial Keplerian elements (ISS-like orbit)
-a = 6378.137 + 408    # Semi-major axis [km]
-e = 0.0001           # Eccentricity (nearly circular)
-i = deg2rad(51.6)    # Inclination [rad]
-Ω = deg2rad(0.0)     # RAAN [rad]
-ω = deg2rad(0.0)     # Argument of periapsis [rad]
-f = deg2rad(0.0)     # True anomaly [rad]
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-u0 = [a, e, i, Ω, ω, f]
-
-# Parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-p = ComponentVector(JD=JD, μ=3.986004415e5)  # μ in km³/s²
-tspan = (0.0, 86400.0)  # 24 hours
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+tspan = (0.0, 86400.0)
 
-# Small perturbation force (J2 effect)
-gravity_data = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+u0 = Array(Keplerian(Cartesian(u0_cart), μ))
+sol = propagate(GaussVEPropagator(), u0, p, models, tspan)
+```
+
+### High-Fidelity Propagation
+
+```julia
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
 eop_data = fetch_iers_eop()
-gravity_model = GravityHarmonicsAstroModel(
-    gravity_model = gravity_data,
-    eop_data = eop_data,
-    order = 2, degree = 2
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
 )
-models = DynamicsModel(gravity_model)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
 
-# Create ODE problem using Gauss VE EOM
-function dynamics!(du, u, p, t)
-    GaussVE_EOM!(du, u, p, t, models)
-end
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
 
-prob = ODEProblem(dynamics!, u0, tspan, p)
-sol = solve(prob, Vern8(), abstol=1e-12, reltol=1e-12)
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+tspan = (0.0, 86400.0)
 
-println("Initial elements: $u0")
-println("Final elements: $(sol.u[end])")
+u0 = Array(Keplerian(Cartesian(u0_cart), μ))
+sol = propagate(GaussVEPropagator(), u0, p, models, tspan)
+```
+
+### Using `ODEProblem` Directly
+
+```julia
+using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+
+# Using the same force model setup from above...
+u0 = Array(Keplerian(Cartesian(u0_cart), μ))
+
+f!(du, u, p, t) = GaussVE_EOM!(du, u, p, t, models)
+
+prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
 ```
 
 ## Applications
