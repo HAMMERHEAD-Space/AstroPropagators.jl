@@ -16,7 +16,7 @@ This package provides robust implementations of the following propagation method
     - [x] USM7
     - [x] USM6
     - [x] USMEM
-- [ ] GEqOE
+- [x] GEqOE
 
 ## Design Philosophy
 

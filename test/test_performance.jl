@@ -197,4 +197,19 @@ end
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
+
+    config_geqoe = RegularizedCoordinateConfig(; W=W)
+
+    @test length(
+        check_allocs(
+            (u, p, t, models) -> GEqOE_EOM(u, p, t, models, config_geqoe),
+            (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
+        ),
+    ) == 0
+    @test length(
+        check_allocs(
+            (du, u, p, t, models) -> GEqOE_EOM!(du, u, p, t, models, config_geqoe),
+            (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
+        ),
+    ) == 0
 end

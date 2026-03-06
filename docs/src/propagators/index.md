@@ -31,3 +31,7 @@ The Stiefel-Scheifele method provides canonical regularization for orbital dynam
 ### [Unified State Model](usm.md)
 
 USM provides a unified framework with three variants (USM7, USM6, USMEM) that combine velocity hodograph components with different attitude parameterizations.
+
+### [Generalized Equinoctial Orbital Elements (GEqOE)](geqoe.md)
+
+GEqOE generalizes the classical equinoctial elements by embedding the disturbing potential into the element definitions, providing dramatic improvements in propagation accuracy for perturbed orbits.

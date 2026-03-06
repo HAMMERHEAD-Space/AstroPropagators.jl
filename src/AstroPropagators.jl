@@ -23,6 +23,7 @@ include("propagators/Kustaanheimo-Stiefel.jl")
 include("propagators/Milankovich.jl")
 include("propagators/Stiefel-Scheifele.jl")
 include("propagators/USM.jl")
+include("propagators/GEqOE.jl")
 
 # Events
 include("events/impulsive_maneuvers.jl")

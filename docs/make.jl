@@ -20,6 +20,7 @@ makedocs(;
             "propagators/stiefel_scheifele.md",
             "propagators/milankovich.md",
             "propagators/usm.md",
+            "propagators/geqoe.md",
         ],
         "API Reference" => "man/api.md",
         "Library" => "lib/library.md",

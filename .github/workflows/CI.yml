@@ -6,13 +6,12 @@ on:
     tags: ['*']
   pull_request:
 concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: only if it is a pull request build.
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 jobs:
+  # Fast test suite: correctness, performance, Aqua, JET (no AD backends loaded)
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -48,3 +47,26 @@ jobs:
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Quick AD smoke-test: ForwardDiff only, single platform
+  diff-test:
+    name: Differentiability (ForwardDiff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.11'
+      - uses: julia-actions/cache@v2
+        env:
+          cache-name: cache-artifacts-diff
+        with:
+          path: ~/.julia/artifacts
+          key: Linux-diff-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            Linux-diff-${{ env.cache-name }}-
+            Linux-diff-
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+        env:
+          ASTROPROPAGATORS_TEST_DIFF: "ForwardDiff"

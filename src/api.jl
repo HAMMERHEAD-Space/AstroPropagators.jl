@@ -4,6 +4,7 @@ abstract type AbstractPropType end
 export CowellPropagator,
     EDromoPropagator,
     GaussVEPropagator,
+    GEqOEPropagator,
     KSPropagator,
     MilankovichPropagator,
     StiSchePropagator,
@@ -19,6 +20,7 @@ struct MilankovichPropagator <: AbstractPropType end
 struct StiSchePropagator <: AbstractPropType end
 struct USM7Propagator <: AbstractPropType end
 struct USM6Propagator <: AbstractPropType end
+struct GEqOEPropagator <: AbstractPropType end
 struct USMEMPropagator <: AbstractPropType end
 
 function propagate(
@@ -55,6 +57,8 @@ function propagate(
             USM6_EOM!(du, u, p, t, models)
         elseif prop_type == USMEMPropagator()
             USMEM_EOM!(du, u, p, t, models)
+        elseif prop_type == GEqOEPropagator()
+            GEqOE_EOM!(du, u, p, t, models, config)
         end
 
     ODE_prob::ODEProblem{UT,TT,true} = ODEProblem{true}(EOM!, u0, tspan, p)

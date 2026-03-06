@@ -1,0 +1,35 @@
+name: Differentiability
+on:
+  push:
+    tags: ['*']
+  workflow_dispatch:
+    inputs:
+      backends:
+        description: 'AD backends to test (comma-separated, or "all")'
+        required: false
+        default: 'all'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  diff-test-full:
+    name: Full AD Suite (all backends)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.11'
+      - uses: julia-actions/cache@v2
+        env:
+          cache-name: cache-artifacts-diff-full
+        with:
+          path: ~/.julia/artifacts
+          key: Linux-diff-full-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            Linux-diff-full-${{ env.cache-name }}-
+            Linux-diff-full-
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+        env:
+          ASTROPROPAGATORS_TEST_DIFF: ${{ github.event.inputs.backends || 'all' }}

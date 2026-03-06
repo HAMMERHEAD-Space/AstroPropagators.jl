@@ -40,6 +40,9 @@ const _state_ks_lt = Array(KustaanheimoStiefel(Cartesian(_state), _μ, _config_l
 const _state_stische_pt = Array(StiefelScheifele(Cartesian(_state), _μ, _ϕ_pt, _config_pt))
 const _state_stische_lt = Array(StiefelScheifele(Cartesian(_state), _μ, _ϕ_lt, _config_lt))
 
+const _config_geqoe = RegularizedCoordinateConfig(; W=-1e-2)
+const _state_geqoe = Array(GEqOE(Cartesian(_state), _μ, _config_geqoe))
+
 const _eop_data = fetch_iers_eop()
 const _grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
 
