@@ -1,4 +1,5 @@
 export GEqOE_EOM, GEqOE_EOM!
+export impulsive_burn_geqoe!, GEqOE_burn
 
 """
     GEqOE_EOM(
@@ -67,12 +68,8 @@ function GEqOE_EOM(
     ς̃ = 1.0 + ς
 
     γ = 1.0 + q₁^2 + q₂^2
-    eₓ = SVector{3}(
-        (1.0 - q₁^2 + q₂^2) / γ, (2.0 * q₁ * q₂) / γ, (-2.0 * q₁) / γ
-    )
-    eᵧ = SVector{3}(
-        (2.0 * q₁ * q₂) / γ, (1.0 + q₁^2 - q₂^2) / γ, (2.0 * q₂) / γ
-    )
+    eₓ = SVector{3}((1.0 - q₁^2 + q₂^2) / γ, (2.0 * q₁ * q₂) / γ, (-2.0 * q₁) / γ)
+    eᵧ = SVector{3}((2.0 * q₁ * q₂) / γ, (1.0 + q₁^2 - q₂^2) / γ, (2.0 * q₂) / γ)
 
     sL = dot(eᵣ, eᵧ)
     cL = dot(eᵣ, eₓ)
@@ -84,9 +81,7 @@ function GEqOE_EOM(
     ##################################################
     kep_model = KeplerianGravityAstroModel(; μ=μ)
 
-    U =
-        potential(u_cart, ps, t, models.gravity_model) -
-        potential(u_cart, ps, t, kep_model)
+    U = potential(u_cart, ps, t, models.gravity_model) - potential(u_cart, ps, t, kep_model)
 
     U_t = potential_time_derivative(u_cart, ps, t, models.gravity_model)
 
@@ -179,4 +174,51 @@ function GEqOE_EOM!(
     du .= GEqOE_EOM(u, p, t, models, config)
 
     return nothing
+end
+
+"""
+    impulsive_burn_geqoe!(integrator, ΔV, config; frame=InertialFrame())
+
+Apply an instantaneous velocity change to a GEqOE state within a
+`DifferentialEquations.jl` integrator.
+
+The `ΔV` vector is interpreted in the reference frame specified by `frame`
+(see [`InertialFrame`](@ref), [`RTNFrame`](@ref), [`VNBFrame`](@ref)).
+"""
+function impulsive_burn_geqoe!(
+    integrator::T,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
+) where {T<:SciMLBase.DEIntegrator}
+    cart_state = Cartesian(GEqOE(integrator.u), integrator.p.μ, config)
+    ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
+
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
+    new_cart_state = Cartesian(new_state...)
+
+    integrator.u = params(GEqOE(new_cart_state, integrator.p.μ, config))
+
+    return nothing
+end
+
+"""
+    GEqOE_burn(burn_time, ΔV, config; frame=InertialFrame())
+
+Returns a `ContinuousCallback` which triggers an [`impulsive_burn_geqoe!`](@ref)
+maneuver at a specified `burn_time`.
+
+The `ΔV` is interpreted in the given `frame` (default: [`InertialFrame`](@ref)).
+"""
+function GEqOE_burn(
+    burn_time::Number,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
+)
+    ContinuousCallback(
+        (u, t, integrator) -> t - burn_time,
+        (integrator) -> impulsive_burn_geqoe!(integrator, ΔV, config; frame),
+    )
 end

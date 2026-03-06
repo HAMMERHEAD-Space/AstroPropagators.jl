@@ -1,28 +1,41 @@
+"""
+    skew_sym(x::AbstractVector) -> SMatrix{3,3}
+
+Construct the 3×3 skew-symmetric (cross-product) matrix of a 3-vector `x`,
+such that `skew_sym(x) * y == cross(x, y)` for any 3-vector `y`.
+"""
 function skew_sym(x::AbstractVector{<:Number})
-    return SMatrix{3,3}(0.0, x[3], -x[2], -x[3], 0.0, x[1], x[2], -x[1], 0.0)
+    z = zero(eltype(x))
+    return SMatrix{3,3}(z, x[3], -x[2], -x[3], z, x[1], x[2], -x[1], z)
 end
 
-function quaternions2DCM(u::AbstractVector{<:Number})
-    q0, q1, q2, q3 = u
+"""
+    inertial_to_RTN(a_inertial::AbstractVector, u::AbstractVector) -> SVector{3}
 
-    return [
-        q0^2 + q1^2 - q2^2-q3^2 2*(q1 * q2 + q0 * q3) 2*(q1 * q3 - q0 * q2)
-        2*(q1 * q2 - q0 * q3) q0^2 - q1^2 + q2^2-q3^2 2*(q2 * q3 + q0 * q1)
-        2*(q1 * q3 + q0 * q2) 2*(q2 * q3 - q0 * q1) q0^2 - q1^2 - q2^2+q3^2
-    ]
-end
+Project an inertial-frame vector into the RTN (Radial–Transverse–Normal) frame.
 
-function RTN_frame(u::AbstractVector{<:Number})
-    R = SVector{3}(u[1], u[2], u[3])
-    V = SVector{3}(u[4], u[5], u[6])
+The RTN basis is constructed from a Cartesian state `u = [r; v]`:
+- **R̂**: `r / |r|`
+- **N̂**: `(r × v) / |r × v|`
+- **T̂**: `N̂ × R̂`
 
-    R̂ = R ./ √(sum(abs2.(R)))
-    V̂ = V ./ √(sum(abs2.(V)))
+Returns `SVector{3}(a⋅R̂, a⋅T̂, a⋅N̂)`.
+"""
+@inline function inertial_to_RTN(
+    a_inertial::AbstractVector{AT}, u::AbstractVector{UT}
+) where {AT,UT}
+    r = SVector{3}(u[1], u[2], u[3])
+    v = SVector{3}(u[4], u[5], u[6])
 
-    N = cross(R̂, V̂)
-    N̂ = N ./ √(sum(abs2.(N)))
-    T = cross(N, R)
-    T̂ = T ./ √(sum(abs2.(T)))
+    r_norm = norm(r)
+    R̂ = SVector{3}(r[1] / r_norm, r[2] / r_norm, r[3] / r_norm)
 
-    return [R̂'; T̂'; N̂']
+    h = cross(r, v)
+    h_norm = norm(h)
+    N̂ = SVector{3}(h[1] / h_norm, h[2] / h_norm, h[3] / h_norm)
+
+    T̂ = cross(N̂, R̂)
+
+    a = SVector{3,AT}(a_inertial[1], a_inertial[2], a_inertial[3])
+    return SVector{3}(dot(a, R̂), dot(a, T̂), dot(a, N̂))
 end

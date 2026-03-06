@@ -2,6 +2,21 @@ export StiSche_EOM, StiSche_EOM!
 export StiSche_time_condition,
     end_StiSche_integration, impulsive_burn_stische!, StiSche_burn
 
+"""
+    StiSche_EOM(u, p, ϕ, models, config)
+
+Equations of motion for the Stiefel-Scheifele regularized formulation.
+
+# Arguments
+- `u::AbstractArray`: The Stiefel-Scheifele state vector `[α₁..₄, β₁..₄, ω, τ]`.
+- `p::ComponentVector`: Parameter vector containing `μ` and `JD`.
+- `ϕ::Number`: The independent variable (fictitious time).
+- `models::AbstractDynamicsModel`: Force model composition.
+- `config::RegularizedCoordinateConfig`: Regularization configuration (DU, TU, time element type).
+
+# Returns
+- `SVector{10}`: Instantaneous rate of change of the Stiefel-Scheifele state.
+"""
 function StiSche_EOM(
     u::AbstractArray,
     p::ComponentVector,
@@ -83,11 +98,20 @@ function StiSche_EOM(
         lte2 = (r_mag / (16.0 * ω^3)) * dot(KSp, ∇U_u - 2.0 * Lp)
         lte3 = (2.0 / ω^2) * dω * dot(KSp, KSv)
         dτ = lte1 - lte2 - lte3
+    else
+        error(
+            "Time flag in RegularizedCoordinateConfig not supported by Stiefel-Scheifele formulation.",
+        )
     end
 
     return SVector{10}(dα[1], dα[2], dα[3], dα[4], dβ[1], dβ[2], dβ[3], dβ[4], dω, dτ)
 end
 
+"""
+    StiSche_EOM!(du, u, p, ϕ, models, config)
+
+In-place version of [`StiSche_EOM`](@ref).
+"""
 function StiSche_EOM!(
     du::AbstractArray,
     u::AbstractArray,
@@ -153,7 +177,8 @@ function impulsive_burn_stische!(
     )
     ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
 
-    new_state = cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
     new_cart_state = Cartesian(new_state...)
 
     t_maneuver = get_stiefelscheifele_time(integrator.u, integrator.t, config)

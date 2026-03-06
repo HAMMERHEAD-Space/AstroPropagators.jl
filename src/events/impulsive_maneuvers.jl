@@ -31,7 +31,8 @@ function impulsive_burn!(
 ) where {T<:SciMLBase.DEIntegrator,V<:typeof(AstroCoords.AstroCoord)}
     cart_state = Cartesian(coordinate_set(integrator.u), integrator.p.μ)
     ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
-    new_state = cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
     new_cart_state = Cartesian(new_state...)
 
     integrator.u = params(coordinate_set(new_cart_state, integrator.p.μ))

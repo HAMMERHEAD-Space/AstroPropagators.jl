@@ -1,6 +1,21 @@
 export KS_EOM, KS_EOM!
 export KS_time_condition, end_KS_integration, impulsive_burn_ks!, KS_burn
 
+"""
+    KS_EOM(u, p, ϕ, models, config)
+
+Equations of motion for the Kustaanheimo-Stiefel (KS) regularized formulation.
+
+# Arguments
+- `u::AbstractArray`: The KS state vector `[KSp₁..₄, KSv₁..₄, h, τ]`.
+- `p::ComponentVector`: Parameter vector containing `μ` and `JD`.
+- `ϕ::Number`: The independent variable (fictitious time).
+- `models::AbstractDynamicsModel`: Force model composition.
+- `config::RegularizedCoordinateConfig`: Regularization configuration (DU, TU, time element type).
+
+# Returns
+- `SVector{10}`: Instantaneous rate of change of the KS state.
+"""
 function KS_EOM(
     u::AbstractArray,
     p::ComponentVector,
@@ -88,6 +103,11 @@ function KS_EOM(
     )
 end
 
+"""
+    KS_EOM!(du, u, p, ϕ, models, config)
+
+In-place version of [`KS_EOM`](@ref).
+"""
 function KS_EOM!(
     du::AbstractArray,
     u::AbstractArray,
@@ -173,7 +193,8 @@ function impulsive_burn_ks!(
     cart_state = Cartesian(KustaanheimoStiefel(integrator.u), integrator.p.μ, config)
     ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
 
-    new_state = cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
     new_cart_state = Cartesian(new_state...)
 
     t_maneuver = get_KS_time(integrator.u, config)

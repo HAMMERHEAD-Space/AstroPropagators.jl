@@ -1,22 +1,22 @@
 export Cowell_EOM, Cowell_EOM!
 """
-    function Cowell_EOM(
+    Cowell_EOM(
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
-        models::NTuple{N,AstroForceModels.AbstractAstroForceModel},
-    ) where {N}
+        models::AbstractDynamicsModel,
+    )
 
-Cowell propagation schema for orbital trajectories
+Cowell propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current Cartesian state.
--`p::ComponentVector`: The parameter vector, only the simulation start date JD is provided.
--`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current Cartesian state.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{6}`: Instantaneous rate of change of the Cartesian state.
 """
 function Cowell_EOM(
     u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
@@ -26,25 +26,9 @@ function Cowell_EOM(
 end
 
 """
-    function Cowell_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    Cowell_EOM!(du, u, p, t, models)
 
-Cowell propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current Cartesian state.
--`p::ComponentVector`: The parameter vector, only the simulation start date JD is provided.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
-
-Returns:
-- `nothing`
+In-place version of [`Cowell_EOM`](@ref).
 """
 function Cowell_EOM!(
     du::AbstractVector,

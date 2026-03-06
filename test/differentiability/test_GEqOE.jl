@@ -34,7 +34,9 @@ end
             )
 
             f_ad, df_ad = value_and_derivative(
-                (x) -> Array(GEqOE_EOM(Array(_state_geqoe), _p2, x, _model_list, _config_geqoe)),
+                (x) -> Array(
+                    GEqOE_EOM(Array(_state_geqoe), _p2, x, _model_list, _config_geqoe)
+                ),
                 backend[2],
                 _t,
             )
