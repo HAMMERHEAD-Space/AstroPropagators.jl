@@ -179,7 +179,7 @@ sol = propagate(USMEMPropagator(), u0_usmem, p, models, tspan)
 ### Using `ODEProblem` Directly
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model setup from above...
 u0 = Array(USM7(Cartesian(u0_cart), μ))
@@ -187,7 +187,7 @@ u0 = Array(USM7(Cartesian(u0_cart), μ))
 f!(du, u, p, t) = USM7_EOM!(du, u, p, t, models)
 
 prob = ODEProblem(f!, u0, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
 # Similarly for USM6 and USMEM:
 # f!(du, u, p, t) = USM6_EOM!(du, u, p, t, models)

@@ -76,7 +76,7 @@ export eom!
         p::ComponentArray,
         models::AbstractDynamicsModel,
         tspan::Tuple;
-        solver=VCABM(),
+        solver=Vern9(),
         abstol=1e-13,
         reltol=1e-13,
         kwargs...,
@@ -92,7 +92,7 @@ Propagate an orbit using a standard (non-regularized) formulation.
 - `tspan::Tuple`: Integration time span `(t0, tf)` in seconds.
 
 # Keyword Arguments
-- `solver`: ODE solver algorithm (default: `VCABM()`).
+- `solver`: ODE solver algorithm (default: `Vern9()`).
 - `abstol`: Absolute tolerance (default: `1e-13`).
 - `reltol`: Relative tolerance (default: `1e-13`).
 - `kwargs...`: Additional keyword arguments forwarded to `OrdinaryDiffEq.solve`.
@@ -106,7 +106,7 @@ function propagate(
     p::ComponentArray,
     models::AstroForceModels.AbstractDynamicsModel,
     tspan::Tuple;
-    solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=VCABM(),
+    solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=Vern9(),
     abstol::Real=1e-13,
     reltol::Real=1e-13,
     kwargs...,
@@ -128,7 +128,7 @@ end
         models::AbstractDynamicsModel,
         tspan::Tuple,
         config::RegularizedCoordinateConfig;
-        solver=VCABM(),
+        solver=Vern9(),
         abstol=1e-13,
         reltol=1e-13,
         kwargs...,
@@ -147,7 +147,7 @@ Propagate an orbit using a regularized formulation that requires a
   potential, characteristic scales, time element type).
 
 # Keyword Arguments
-- `solver`: ODE solver algorithm (default: `VCABM()`).
+- `solver`: ODE solver algorithm (default: `Vern9()`).
 - `abstol`: Absolute tolerance (default: `1e-13`).
 - `reltol`: Relative tolerance (default: `1e-13`).
 - `kwargs...`: Additional keyword arguments forwarded to `OrdinaryDiffEq.solve`.
@@ -162,7 +162,7 @@ function propagate(
     models::AstroForceModels.AbstractDynamicsModel,
     tspan::Tuple,
     config::RegularizedCoordinateConfig;
-    solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=VCABM(),
+    solver::OrdinaryDiffEqCore.OrdinaryDiffEqAlgorithm=Vern9(),
     abstol::Real=1e-13,
     reltol::Real=1e-13,
     kwargs...,

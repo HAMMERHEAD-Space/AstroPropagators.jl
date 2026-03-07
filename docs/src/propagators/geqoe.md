@@ -145,7 +145,7 @@ sol = propagate(GEqOEPropagator(), u0, p, models, tspan, config)
 ### Using `ODEProblem` Directly
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model and config setup from above...
 u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
@@ -153,7 +153,7 @@ u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
 f!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, models, config)
 
 prob = ODEProblem(f!, u0, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
 # Convert back to Cartesian
 final_cart = Cartesian(GEqOE(sol.u[end]), μ, config)

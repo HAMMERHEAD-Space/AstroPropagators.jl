@@ -95,7 +95,7 @@ All keyword arguments are forwarded to `OrdinaryDiffEq.solve`:
 
 ```julia
 sol = propagate(CowellPropagator(), u0, p, models, tspan;
-    solver=VCABM(),    # ODE solver (default: VCABM)
+    solver=Vern9(),    # ODE solver (default: Vern9)
     abstol=1e-13,      # absolute tolerance
     reltol=1e-13,      # relative tolerance
     callback=cb,       # DiffEq callbacks
@@ -169,12 +169,12 @@ system — you can build the problem yourself.
 ### Standard Propagators
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 f!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
 
 prob = ODEProblem(f!, u0_cart, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
 The `eom!` dispatch layer works identically:
@@ -198,7 +198,7 @@ u0 = Array(EDromo(Cartesian(u0_cart), μ, ϕ₀, config))
 f!(du, u, p, t) = EDromo_EOM!(du, u, p, t, models, config)
 
 prob = ODEProblem(f!, u0, (ϕ₀, ϕ₀ + 6π), p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13,
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13,
     callback=end_EDromo_integration(86400.0, config),
 )
 ```
@@ -212,7 +212,7 @@ u0 = Array(GEqOE(Cartesian(u0_cart), μ, config_geqoe))
 f!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, models, config_geqoe)
 
 prob = ODEProblem(f!, u0, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
 ## Extending with New Propagators

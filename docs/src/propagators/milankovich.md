@@ -133,7 +133,7 @@ sol = propagate(MilankovichPropagator(), u0, p, models, tspan)
 ### Using `ODEProblem` Directly
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model setup from above...
 u0 = Array(Milankovich(Cartesian(u0_cart), μ))
@@ -141,7 +141,7 @@ u0 = Array(Milankovich(Cartesian(u0_cart), μ))
 f!(du, u, p, t) = Milankovich_EOM!(du, u, p, t, models)
 
 prob = ODEProblem(f!, u0, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
 ## References

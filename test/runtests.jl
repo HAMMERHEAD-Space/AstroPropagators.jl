@@ -5,8 +5,8 @@ using AstroForceModels
 using AstroPropagators
 using ComponentArrays
 using LinearAlgebra
-using OrdinaryDiffEqAdamsBashforthMoulton
 using OrdinaryDiffEqCore
+using OrdinaryDiffEqVerner
 using SatelliteToolboxGravityModels
 using SatelliteToolboxTransformations
 using SciMLBase
@@ -15,6 +15,8 @@ using SpaceIndices
 using Aqua
 using JET
 using AllocCheck
+
+include("test_helpers.jl")
 
 @testset "AstroPropagators.jl" begin
     include("propagators/test_cowell.jl")
@@ -26,6 +28,8 @@ using AllocCheck
     include("propagators/test_USM.jl")
     include("propagators/test_GEqOE.jl")
     include("events/test_impulsive_maneuvers.jl")
+    include("test_cross_formulation.jl")
+    include("test_roundtrip.jl")
 end
 
 # Differentiability tests are gated behind an environment variable to keep the default

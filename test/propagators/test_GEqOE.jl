@@ -27,7 +27,7 @@
     EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
 
     prob = ODEProblem(EOM!, u0_geqoe, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
     cart_first = Array(Cartesian(GEqOE(sol.u[1]), μ, config))
     cart_last = Array(Cartesian(GEqOE(sol.u[end]), μ, config))
@@ -102,7 +102,7 @@ end
     EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
 
     prob = ODEProblem(EOM!, u0_geqoe, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
     expected_end = [
         29209.16404907953
@@ -115,7 +115,7 @@ end
     @test Cartesian(GEqOE(sol.u[end]), μ, config) ≈ expected_end rtol = 1e-2
 end
 
-@testset "GEqOE Propagator High-Fidelity 2" begin
+@testset "GEqOE Propagator High-Fidelity Regression" begin
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
     SpaceIndices.init()
@@ -171,7 +171,7 @@ end
     EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
 
     prob = ODEProblem(EOM!, u0_geqoe, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
     expected_end = [
         -6462.555199025645

@@ -4,8 +4,8 @@ using AstroCoords
 using AstroForceModels
 using ComponentArrays
 using LinearAlgebra
-using OrdinaryDiffEqAdamsBashforthMoulton
 using OrdinaryDiffEqCore
+using OrdinaryDiffEqVerner
 using SciMLBase
 using StaticArraysCore
 

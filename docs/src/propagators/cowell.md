@@ -106,7 +106,7 @@ the EOM closure into a larger system — you can bypass `propagate` and build th
 `ODEProblem` yourself.
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model setup from above...
 
@@ -117,7 +117,7 @@ f!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
 # f!(du, u, p, t) = eom!(CowellPropagator(), du, u, p, t, models)
 
 prob = ODEProblem(f!, u0_cart, tspan, p)
-sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
 This is exactly what `propagate` does internally, so the two approaches produce

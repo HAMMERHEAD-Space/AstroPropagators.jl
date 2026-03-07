@@ -106,7 +106,7 @@ sol = propagate(
 ### Using `ODEProblem` Directly
 
 ```julia
-using OrdinaryDiffEqAdamsBashforthMoulton, SciMLBase
+using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model and config setup from above...
 ϕ₀ = compute_initial_phi(u0_cart, μ, config)
@@ -117,7 +117,7 @@ f!(du, u, p, t) = StiSche_EOM!(du, u, p, t, models, config)
 
 prob = ODEProblem(f!, u0, tspan, p)
 sol = solve(
-    prob, VCABM();
+    prob, Vern9();
     abstol=1e-13, reltol=1e-13,
     callback=end_StiSche_integration(86400.0, config),
 )
