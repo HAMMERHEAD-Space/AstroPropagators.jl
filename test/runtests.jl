@@ -2,6 +2,7 @@ using Test
 
 using AstroCoords
 using AstroForceModels
+using AstroMeasurements
 using AstroPropagators
 using ComponentArrays
 using LinearAlgebra
@@ -10,6 +11,7 @@ using OrdinaryDiffEqVerner
 using SatelliteToolboxGravityModels
 using SatelliteToolboxTransformations
 using SciMLBase
+using StaticArraysCore
 using SpaceIndices
 
 using Aqua
@@ -28,6 +30,8 @@ include("test_helpers.jl")
     include("propagators/test_USM.jl")
     include("propagators/test_GEqOE.jl")
     include("events/test_impulsive_maneuvers.jl")
+    include("events/test_event_detectors.jl")
+    include("events/test_extension_measurements.jl")
     include("test_cross_formulation.jl")
     include("test_roundtrip.jl")
     include("test_api.jl")

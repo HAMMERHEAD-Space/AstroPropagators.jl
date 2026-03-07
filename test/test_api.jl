@@ -158,7 +158,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_EDromo_integration(duration, config),
+            callback=build_termination_callback(duration, EDromo, config),
         )
         final_cart = Array(Cartesian(EDromo(sol.u[end]), μ, sol.t[end], config))
         @test final_cart ≈ ref rtol = 1e-3
@@ -175,7 +175,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_KS_integration(duration, config),
+            callback=build_termination_callback(duration, KustaanheimoStiefel, config),
         )
         final_cart = Array(Cartesian(KustaanheimoStiefel(sol.u[end]), μ, config))
         @test final_cart ≈ ref rtol = 1e-3
@@ -193,7 +193,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_StiSche_integration(duration, config),
+            callback=build_termination_callback(duration, StiefelScheifele, config),
         )
         final_cart = Array(Cartesian(StiefelScheifele(sol.u[end]), μ, sol.t[end], config))
         @test final_cart ≈ ref rtol = 1e-3
@@ -266,7 +266,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_EDromo_integration(duration, config),
+            callback=build_termination_callback(duration, EDromo, config),
         )
         final_cart = Array(Cartesian(EDromo(sol.u[end]), μ, sol.t[end], config))
         @test final_cart ≈ ref rtol = 1e-3
@@ -283,7 +283,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_KS_integration(duration, config),
+            callback=build_termination_callback(duration, KustaanheimoStiefel, config),
         )
         final_cart = Array(Cartesian(KustaanheimoStiefel(sol.u[end]), μ, config))
         @test final_cart ≈ ref rtol = 1e-3
@@ -301,7 +301,7 @@ end
             model_list,
             tspan,
             config;
-            callback=end_StiSche_integration(duration, config),
+            callback=build_termination_callback(duration, StiefelScheifele, config),
         )
         final_cart = Array(Cartesian(StiefelScheifele(sol.u[end]), μ, sol.t[end], config))
         @test final_cart ≈ ref rtol = 1e-3

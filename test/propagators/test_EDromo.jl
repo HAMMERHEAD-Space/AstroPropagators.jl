@@ -41,7 +41,7 @@
         Vern9();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0, edromo_config),
+        callback=build_termination_callback(86400.0, EDromo, edromo_config),
     )
 
     NRG = orbitalNRG.(EDromo.(sol.u), μ, sol.t, [edromo_config])
@@ -104,7 +104,7 @@ end
         Vern9();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0, edromo_config),
+        callback=build_termination_callback(86400.0, EDromo, edromo_config),
     )
 
     NRG = zeros(length(sol.u))
@@ -176,7 +176,7 @@ end
         Vern9();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_EDromo_integration(86400.0, edromo_config),
+        callback=build_termination_callback(86400.0, EDromo, edromo_config),
     )
 
     NRG = zeros(length(sol.u))
@@ -274,7 +274,7 @@ end
         Vern9();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
+        callback=build_termination_callback(3.0 * 86400.0, EDromo, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
@@ -366,7 +366,7 @@ end
         Vern9();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
+        callback=build_termination_callback(3.0 * 86400.0, EDromo, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
@@ -458,7 +458,7 @@ end
         Vern9();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_EDromo_integration(3.0 * 86400.0, edromo_config),
+        callback=build_termination_callback(3.0 * 86400.0, EDromo, edromo_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated

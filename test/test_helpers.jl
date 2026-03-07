@@ -1,5 +1,11 @@
 const COMMON_JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
+mutable struct _MockIntegrator{UT,PT}
+    u::UT
+    t::Float64
+    p::PT
+end
+
 const KEPLERIAN_U0 = [
     -1076.225324679696
     -6765.896364327722
@@ -165,7 +171,7 @@ function run_edromo(
         Vern9();
         abstol=atol,
         reltol=rtol,
-        callback=end_EDromo_integration(duration, config),
+        callback=build_termination_callback(duration, EDromo, config),
     )
     return Array(Cartesian(EDromo(sol.u[end]), μ, sol.t[end], config))
 end
@@ -193,7 +199,7 @@ function run_ks(
         Vern9();
         abstol=atol,
         reltol=rtol,
-        callback=end_KS_integration(duration, config),
+        callback=build_termination_callback(duration, KustaanheimoStiefel, config),
     )
     return Array(Cartesian(KustaanheimoStiefel(sol.u[end]), μ, config))
 end
@@ -222,7 +228,7 @@ function run_stische(
         Vern9();
         abstol=atol,
         reltol=rtol,
-        callback=end_StiSche_integration(duration, config),
+        callback=build_termination_callback(duration, StiefelScheifele, config),
     )
     return Array(Cartesian(StiefelScheifele(sol.u[end]), μ, sol.t[end], config))
 end
