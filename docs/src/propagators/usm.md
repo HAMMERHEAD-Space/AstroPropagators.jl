@@ -101,40 +101,102 @@ The velocity hodograph components represent the velocity vector in a special coo
 
 ## Usage Examples
 
-### USM7 Propagation
+### USM7 — Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEq
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial Cartesian state
-r0 = [6378.137 + 408, 0.0, 0.0]  # Position [km]
-v0 = [0.0, 7.660, 0.0]           # Velocity [km/s]
-u0_cart = [r0; v0]
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-# Convert to USM7
-cart_state = Cartesian(u0_cart, μ=3.986004415e5)  # km, km/s, km³/s²
-usm_state = USM7(cart_state)
-u0_usm7 = [usm_state.C, usm_state.Rf1, usm_state.Rf2,
-           usm_state.ϵO1, usm_state.ϵO2, usm_state.ϵO3, usm_state.η0]
-
-# Parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-p = ComponentVector(JD=JD, μ=3.986004415e5)  # km³/s²
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+tspan = (0.0, 86400.0)
 
-# Force models
-gravity_model = KeplerianGravityAstroModel(μ=3.986004415e5)
-models = DynamicsModel(gravity_model)
+u0 = Array(USM7(Cartesian(u0_cart), μ))
+sol = propagate(USM7Propagator(), u0, p, models, tspan)
+```
 
-# Create ODE problem using USM7 EOM
-function dynamics!(du, u, p, t)
-    USM7_EOM!(du, u, p, t, models)
-end
+### USM7 — High-Fidelity Propagation
 
-prob = ODEProblem(dynamics!, u0_usm7, (0.0, 86400.0), p)
-sol = solve(prob, Vern8(), abstol=1e-12, reltol=1e-12)
+```julia
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
+)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
+
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
+
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+tspan = (0.0, 86400.0)
+
+u0 = Array(USM7(Cartesian(u0_cart), μ))
+sol = propagate(USM7Propagator(), u0, p, models, tspan)
+```
+
+### USM6 and USMEM
+
+USM6 and USMEM share the same velocity-hodograph core but use different attitude
+parameterizations. Just swap the coordinate type and propagator:
+
+```julia
+# USM6 — Modified Rodrigues Parameters
+u0_usm6 = Array(USM6(Cartesian(u0_cart), μ))
+sol = propagate(USM6Propagator(), u0_usm6, p, models, tspan)
+
+# USMEM — Exponential Mapping
+u0_usmem = Array(USMEM(Cartesian(u0_cart), μ))
+sol = propagate(USMEMPropagator(), u0_usmem, p, models, tspan)
+```
+
+### Using `ODEProblem` Directly
+
+```julia
+using OrdinaryDiffEqVerner, SciMLBase
+
+# Using the same force model setup from above...
+u0 = Array(USM7(Cartesian(u0_cart), μ))
+
+# In-place (what propagate! uses internally)
+f!(du, u, p, t) = USM7_EOM!(du, u, p, t, models)
+prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = USM7_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Similarly for USM6 and USMEM:
+# f(u, p, t) = USM6_EOM(u, p, t, models)
+# f(u, p, t) = USMEM_EOM(u, p, t, models)
 ```
 
 ## References

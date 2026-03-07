@@ -70,46 +70,83 @@ In the unperturbed two-body problem:
 
 ## Usage Examples
 
-### Basic Orbital Propagation
+### Keplerian Propagation
 
 ```julia
-using AstroPropagators
-using AstroForceModels, AstroCoords
-using ComponentArrays
-using OrdinaryDiffEq
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
 
-# Initial conditions (can be any orbit type)
-r0 = [6378.137 + 800, 0.0, 0.0]  # Position [km]
-v0 = [0.0, 7.450, 0.0]           # Velocity [km/s]
-u0_cart = [r0; v0]
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
 
-# Convert to Milankovich elements
-cart_state = Cartesian(u0_cart, μ=3.986004415e5)
-mil_state = Milankovich(cart_state)
-u0_milan = [mil_state.hx, mil_state.hy, mil_state.hz,
-            mil_state.ex, mil_state.ey, mil_state.ez, mil_state.L]
-
-# Parameters
 JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
-p = ComponentVector(JD=JD, μ=3.986004415e5)  # km³/s²
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+tspan = (0.0, 86400.0)
 
-# Force models
-gravity_model = GravityHarmonicsAstroModel(
-    gravity_model = gravity_data,
-    eop_data = eop_data,
-    order = 4, degree = 4
+u0 = Array(Milankovich(Cartesian(u0_cart), μ))
+sol = propagate(MilankovichPropagator(), u0, p, models, tspan)
+```
+
+### High-Fidelity Propagation
+
+```julia
+using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
 )
-models = DynamicsModel(gravity_model)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
 
-# Create ODE problem using Milankovich EOM
-function dynamics!(du, u, p, t)
-    Milankovich_EOM!(du, u, p, t, models)
-end
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
 
-prob = ODEProblem(dynamics!, u0_milan, (0.0, 86400.0), p)
-sol = solve(prob, Vern8(), abstol=1e-12, reltol=1e-12)
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+tspan = (0.0, 86400.0)
 
-println("Milankovich propagation completed")
+u0 = Array(Milankovich(Cartesian(u0_cart), μ))
+sol = propagate(MilankovichPropagator(), u0, p, models, tspan)
+```
+
+### Using `ODEProblem` Directly
+
+```julia
+using OrdinaryDiffEqVerner, SciMLBase
+
+# Using the same force model setup from above...
+u0 = Array(Milankovich(Cartesian(u0_cart), μ))
+
+# In-place (what propagate! uses internally)
+f!(du, u, p, t) = Milankovich_EOM!(du, u, p, t, models)
+prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = Milankovich_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
 ## References

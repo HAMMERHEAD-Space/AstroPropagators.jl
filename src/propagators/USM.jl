@@ -1,22 +1,17 @@
 export USM7_EOM, USM7_EOM!
 """
-    function USM7_EOM(
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USM7_EOM(u, p, t, models)
 
-Unified State Model (quaternions) propagation schema for orbital trajectories
+Unified State Model (quaternions) propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current USM7 state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current USM7 state `[C, Rf1, Rf2, ϵO1, ϵO2, ϵO3, η0]`.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{7}`: Instantaneous rate of change of the USM7 state.
 """
 function USM7_EOM(
     u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
@@ -34,11 +29,11 @@ function USM7_EOM(
 
     u_cart = Cartesian(USM7(u), p.μ)
 
-    fe =
-        RTN_frame(u_cart) * (
-            build_dynamics_model(u_cart, p, t, models) -
-            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
-        )
+    fe = inertial_to_RTN(
+        build_dynamics_model(u_cart, p, t, models) -
+        acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ)),
+        u_cart,
+    )
 
     ω1 = fe[3] / ve2
 
@@ -54,25 +49,9 @@ function USM7_EOM(
 end
 
 """
-    function USM7_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USM7_EOM!(du, u, p, t, models)
 
-Unified State Model (quaternions) propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current USM7 state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
-
-Returns:
-- `nothing`
+In-place version of [`USM7_EOM`](@ref).
 """
 function USM7_EOM!(
     du::AbstractVector,
@@ -88,40 +67,33 @@ end
 
 export USM6_EOM, USM6_EOM!
 """
-    function USM6_EOM(
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USM6_EOM(u, p, t, models)
 
-Unified State Model (MRP's) propagation schema for orbital trajectories
+Unified State Model (MRPs) propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current USM6 state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current USM6 state `[C, Rf1, Rf2, σ1, σ2, σ3]`.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{6}`: Instantaneous rate of change of the USM6 state.
 """
 function USM6_EOM(
     u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
 )
-    σ = SVector{3}(u[4], u[5], u[6])
-    σ_norm = √(sum(abs2.(σ)))
-
     C, Rf1, Rf2, σ1, σ2, σ3 = u
     μ::Number = p.μ
 
-    _, _, _, ϵO1, ϵO2, ϵO3, η0 = USM7(USM6(u), μ)
+    σ² = σ1^2 + σ2^2 + σ3^2
+    D = 4.0 * σ3^2 + (1.0 - σ²)^2
+
     u_cart = Cartesian(USM6(u), μ)
 
-    sinλ = (4.0 * σ3 * (1.0 - σ_norm^2)) / (4.0 * σ3^2 + (1 - σ_norm^2)^2)
-    cosλ = ((1.0 - σ_norm^2)^2 - 4.0 * σ3^2) / (4.0 * σ3^2 + (1 - σ_norm^2)^2)
-
-    l = (ϵO1 * ϵO3 - ϵO2 * η0) / (ϵO3^2 + η0^2)
+    sinλ = (4.0 * σ3 * (1.0 - σ²)) / D
+    cosλ = ((1.0 - σ²)^2 - 4.0 * σ3^2) / D
+    l = (4.0 * σ1 * σ3 - 2.0 * σ2 * (1.0 - σ²)) / D
 
     ve2 = C - Rf1 * sinλ + Rf2 * cosλ
 
@@ -129,11 +101,11 @@ function USM6_EOM(
 
     ρ = C / ve2
 
-    fe =
-        RTN_frame(u_cart) * (
-            build_dynamics_model(u_cart, p, t, models) -
-            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
-        )
+    fe = inertial_to_RTN(
+        build_dynamics_model(u_cart, p, t, models) -
+        acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ)),
+        u_cart,
+    )
 
     ω1 = fe[3] / ve2
 
@@ -141,32 +113,16 @@ function USM6_EOM(
         -ρ * fe[2],
         fe[1] * cosλ - fe[2] * (1.0 + ρ) * sinλ - fe[3] * l * (Rf2 / ve2),
         fe[1] * sinλ + fe[2] * (1.0 + ρ) * cosλ + fe[3] * l * (Rf1 / ve2),
-        0.25 * ((1.0 - σ_norm^2 + 2.0 * σ1^2) * ω1 + 2.0 * (σ1 * σ3 + σ2) * ω3),
+        0.25 * ((1.0 - σ² + 2.0 * σ1^2) * ω1 + 2.0 * (σ1 * σ3 + σ2) * ω3),
         0.25 * (2.0 * (σ2 * σ1 + σ3) * ω1 + 2.0 * (σ2 * σ3 - σ1) * ω3),
-        0.25 * (2.0 * (σ3 * σ1 - σ2) * ω1 + (1.0 - σ_norm^2 + 2.0 * σ3^2) * ω3),
+        0.25 * (2.0 * (σ3 * σ1 - σ2) * ω1 + (1.0 - σ² + 2.0 * σ3^2) * ω3),
     )
 end
 
 """
-    function USM6_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USM6_EOM!(du, u, p, t, models)
 
-Unified State Model (MRP's) propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current USM6 state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
-
-Returns:
-- `nothing`
+In-place version of [`USM6_EOM`](@ref).
 """
 function USM6_EOM!(
     du::AbstractVector,
@@ -182,26 +138,21 @@ end
 
 export USMEM_EOM, USMEM_EOM!
 """
-    function USMEM_EOM(
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USMEM_EOM(u, p, t, models; Φ_tol=1E-8)
 
-Unified State Model (exponential mapping) propagation schema for orbital trajectories
+Unified State Model (exponential mapping) propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current USMEM state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current USMEM state `[C, Rf1, Rf2, a1, a2, a3]`.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-# Keyword Arguments"
--`Φ_tol::Float64`: The value to switch to the Taylor series expansion to avoid singularity.
+# Keyword Arguments
+- `Φ_tol::Float64`: Threshold to switch to Taylor series expansion to avoid singularity.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{6}`: Instantaneous rate of change of the USMEM state.
 """
 function USMEM_EOM(
     u::AbstractVector,
@@ -218,8 +169,9 @@ function USMEM_EOM(
 
     μ::Number = p.μ
 
-    (_, _, _, ϵO1, ϵO2, ϵO3, η0) = USM7(USMEM(u), μ)
-    u_cart = Cartesian(USMEM(u), μ)
+    usm7 = USM7(USMEM(u), μ)
+    _, _, _, ϵO1, ϵO2, ϵO3, η0 = usm7
+    u_cart = Cartesian(usm7, μ)
 
     sinλ = (2 * ϵO3 * η0) / (ϵO3^2 + η0^2)
     cosλ = (η0^2 - ϵO3^2) / (ϵO3^2 + η0^2)
@@ -228,11 +180,11 @@ function USMEM_EOM(
     ω3 = (C * ve2^2) / μ
     ρ = C / ve2
 
-    fe =
-        RTN_frame(u_cart) * (
-            build_dynamics_model(u_cart, p, t, models) -
-            acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
-        )
+    fe = inertial_to_RTN(
+        build_dynamics_model(u_cart, p, t, models) -
+        acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ)),
+        u_cart,
+    )
 
     ω1 = fe[3] / ve2
 
@@ -261,28 +213,9 @@ function USMEM_EOM(
 end
 
 """
-    function USMEM_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    USMEM_EOM!(du, u, p, t, models; Φ_tol=1E-8)
 
-Unified State Model (exponential mapping) propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current USM7 state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
-
-# Keyword Arguments"
--`Φ_tol::Float64`: The value to switch to the Taylor series expansion to avoid singularity.
-
-Returns:
-- `nothing`
+In-place version of [`USMEM_EOM`](@ref).
 """
 function USMEM_EOM!(
     du::AbstractVector,

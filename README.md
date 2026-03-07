@@ -21,7 +21,7 @@ This project implements several propagation methods using equations of motion fo
     - [x] USM7
     - [x] USM6
     - [x] USMEM
-- [ ] GEqOE
+- [x] GEqOE
 
 ## Installation
 

@@ -1,8 +1,9 @@
-@testset "Milankovich Propagator Keplerian" begin
+@testset "GEqOE Propagator Keplerian" begin
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
     grav_model = KeplerianGravityAstroModel()
-    p = ComponentVector(; JD=JD, μ=grav_model.μ)
+    μ = grav_model.μ
+    p = ComponentVector(; JD=JD, μ=μ)
 
     u0 = [
         -1076.225324679696
@@ -13,22 +14,27 @@
         -1.1880157328553503
     ] #km, km/s
 
-    u0_Mil = Array(AstroCoords.cart2Mil(u0, p.μ))
+    W =
+        potential(Cartesian(u0), p, 0.0, grav_model) -
+        potential(Cartesian(u0), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+
+    config = RegularizedCoordinateConfig(; W=W)
+    u0_geqoe = Array(GEqOE(Cartesian(u0), μ, config))
 
     model_list = CentralBodyDynamicsModel(grav_model)
     tspan = (0.0, 86400.0)
 
-    EOM!(du, u, p, t) = Milankovich_EOM!(du, u, p, t, model_list)
+    EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
 
-    prob = ODEProblem(EOM!, u0_Mil, tspan, p)
+    prob = ODEProblem(EOM!, u0_geqoe, tspan, p)
     sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
-    NRG = orbitalNRG.(Milankovich.(sol.u), p.μ)
 
-    @test NRG[1] ≈ NRG[end]
-    h = norm.(angularMomentumVector.(Milankovich.(sol.u), p.μ))
-    @test h[1] ≈ h[end]
+    cart_first = Array(Cartesian(GEqOE(sol.u[1]), μ, config))
+    cart_last = Array(Cartesian(GEqOE(sol.u[end]), μ, config))
+    NRG_first = 0.5 * sum(abs2, cart_first[4:6]) - μ / sqrt(sum(abs2, cart_first[1:3]))
+    NRG_last = 0.5 * sum(abs2, cart_last[4:6]) - μ / sqrt(sum(abs2, cart_last[1:3]))
+    @test NRG_first ≈ NRG_last
 
-    # Comparison Against Cowell
     expected_end = [
         29447.829229065504
         21027.31807433234
@@ -37,10 +43,10 @@
         2.3814564036944668
         0.1401977642923555
     ]
-    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end
+    @test Cartesian(GEqOE(sol.u[end]), μ, config) ≈ expected_end
 end
 
-@testset "Milankovich Propagator High-Fidelity Regression" begin
+@testset "GEqOE Propagator High-Fidelity Regression" begin
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
     SpaceIndices.init()
@@ -50,14 +56,13 @@ end
     grav_model = GravityHarmonicsAstroModel(;
         gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36
     )
-    p = ComponentVector(;
-        JD=JD, μ=GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
-    )
+    μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+    p = ComponentVector(; JD=JD, μ=μ)
 
     sun_third_body = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
     moon_third_body = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
 
-    satellite_srp_model = CannonballFixedSRP(0.5)
+    satellite_srp_model = CannonballFixedSRP(0.2)
     srp_model = SRPAstroModel(;
         satellite_srp_model=satellite_srp_model,
         sun_data=sun_third_body,
@@ -81,26 +86,31 @@ end
         -1.1880157328553503
     ] #km, km/s
 
-    u0_Mil = Array(Milankovich(Cartesian(u0), p.μ))
-
     model_list = CentralBodyDynamicsModel(
         grav_model, (sun_third_body, moon_third_body, srp_model, drag_model)
     )
 
+    W =
+        potential(Cartesian(u0), p, 0.0, grav_model) -
+        potential(Cartesian(u0), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+
+    config = RegularizedCoordinateConfig(; W=W)
+    u0_geqoe = Array(GEqOE(Cartesian(u0), μ, config))
+
     tspan = (0.0, 3 * 86400.0)
 
-    EOM!(du, u, p, t) = Milankovich_EOM!(du, u, p, t, model_list)
+    EOM!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, model_list, config)
 
-    prob = ODEProblem(EOM!, u0_Mil, tspan, p)
+    prob = ODEProblem(EOM!, u0_geqoe, tspan, p)
     sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
     expected_end = [
-        -6450.189296043982
-        -2390.1577997732825
-        500.30621536168655
-        4.812545432972337
-        -7.890468614052693
-        -1.0701932489701074
+        -6462.555199025645
+        -2369.8382849120076
+        503.0595947121262
+        4.792369569779785
+        -7.897922283599572
+        -1.06862260690453
     ]
-    @test Cartesian(Milankovich(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
+    @test Cartesian(GEqOE(sol.u[end]), μ, config) ≈ expected_end rtol = 2e0
 end

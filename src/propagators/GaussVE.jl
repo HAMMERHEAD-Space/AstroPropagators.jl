@@ -1,22 +1,22 @@
 export GaussVE_EOM, GaussVE_EOM!
 """
-    function GaussVE_EOM(
+    GaussVE_EOM(
         u::AbstractVector,
         p::ComponentVector,
         t::Number,
         models::AbstractDynamicsModel,
     )
 
-Gauss variational propagation schema for orbital trajectories
+Gauss variational equations propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current Keplerian state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current Keplerian state `[a, e, i, Ω, ω, f]`.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{6}`: Instantaneous rate of change of the Keplerian state.
 """
 function GaussVE_EOM(
     u::AbstractVector, ps::ComponentVector, t::Number, models::AbstractDynamicsModel
@@ -25,11 +25,11 @@ function GaussVE_EOM(
     μ::Number = ps.μ
 
     u_cart = Cartesian(Keplerian(u), μ)
-    acc =
-        RTN_frame(u_cart) * (
-            build_dynamics_model(u_cart, ps, t, models) -
-            acceleration(u_cart, ps, t, KeplerianGravityAstroModel(; μ=μ))
-        )
+    acc = inertial_to_RTN(
+        build_dynamics_model(u_cart, ps, t, models) -
+        acceleration(u_cart, ps, t, KeplerianGravityAstroModel(; μ=μ)),
+        u_cart,
+    )
 
     sf, cf = sincos(f)
 
@@ -42,7 +42,7 @@ function GaussVE_EOM(
     si, ci = sincos(i)
 
     ar = acc[1]
-    aθ = acc[2] * sf
+    aθ = acc[2]
     ah = acc[3]
 
     da = (2.0 * a^2) / h * (e * sf * ar + p / r * aθ)
@@ -56,25 +56,9 @@ function GaussVE_EOM(
 end
 
 """
-    function GaussVE_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    GaussVE_EOM!(du, u, p, t, models)
 
-Gauss variational propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current Keplerian state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::NTuple{N,AstroForceModels.AbstractAstroForceModel}`: Tuple of the acceleration models.
-
-Returns:
-- `nothing`
+In-place version of [`GaussVE_EOM`](@ref).
 """
 function GaussVE_EOM!(
     du::AbstractVector,

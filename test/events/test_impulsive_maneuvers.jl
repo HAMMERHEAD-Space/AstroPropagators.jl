@@ -30,7 +30,7 @@
     EOM!(du, u, p, t) = Cowell_EOM!(du, u, p, t, model_list)
 
     prob = ODEProblem(EOM!, u0, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(Cartesian.(sol.u), grav_model.μ)
 
@@ -83,7 +83,7 @@ end
     u0_koe = Array(Keplerian(Cartesian(u0), p.μ))
 
     prob = ODEProblem(EOM!, u0_koe, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(Keplerian.(sol.u), grav_model.μ)
 
@@ -136,7 +136,7 @@ end
     u0_mil = Array(Milankovich(Cartesian(u0), p.μ))
 
     prob = ODEProblem(EOM!, u0_mil, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(Milankovich.(sol.u), grav_model.μ)
 
@@ -188,7 +188,7 @@ end
     u0_mil = Array(USM7(Cartesian(u0), p.μ))
 
     prob = ODEProblem(EOM!, u0_mil, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(USM7.(sol.u), grav_model.μ)
 
@@ -240,7 +240,7 @@ end
     u0_mil = Array(USM6(Cartesian(u0), p.μ))
 
     prob = ODEProblem(EOM!, u0_mil, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(USM6.(sol.u), grav_model.μ)
 
@@ -292,7 +292,7 @@ end
     u0_mil = Array(USMEM(Cartesian(u0), p.μ))
 
     prob = ODEProblem(EOM!, u0_mil, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=burn)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=burn)
 
     NRG = orbitalNRG.(USMEM.(sol.u), grav_model.μ)
 
@@ -350,7 +350,7 @@ end
     u0_edromo = Array(EDromo(Cartesian(u0), p.μ, ϕ₀, edromo_config))
 
     prob = ODEProblem(EOM!, u0_edromo, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     NRG = zeros(length(sol.u))
     for i in 1:length(sol.u)
@@ -419,7 +419,7 @@ end
     u0_edromo = Array(EDromo(Cartesian(u0), p.μ, ϕ₀, edromo_config))
 
     prob = ODEProblem(EOM!, u0_edromo, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     NRG = zeros(length(sol.u))
     for i in 1:length(sol.u)
@@ -488,7 +488,7 @@ end
     u0_edromo = Array(EDromo(Cartesian(u0), p.μ, ϕ₀, edromo_config))
 
     prob = ODEProblem(EOM!, u0_edromo, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     NRG = zeros(length(sol.u))
     for i in 1:length(sol.u)
@@ -553,7 +553,7 @@ end
     u0_ks = Array(KustaanheimoStiefel(Cartesian(u0), p.μ, ks_config))
 
     prob = ODEProblem(EOM!, u0_ks, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     NRG = orbitalNRG.(KustaanheimoStiefel.(sol.u), grav_model.μ, [ks_config])
 
@@ -610,7 +610,7 @@ end
     u0_ks = Array(KustaanheimoStiefel(Cartesian(u0), p.μ, ks_config))
 
     prob = ODEProblem(EOM!, u0_ks, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     NRG = orbitalNRG.(KustaanheimoStiefel.(sol.u), grav_model.μ, [ks_config])
 
@@ -671,7 +671,7 @@ end
     u0_stische = Array(StiefelScheifele(Cartesian(u0), p.μ, ϕ₀, stische_config))
 
     prob = ODEProblem(EOM!, u0_stische, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     @assert sol.retcode == ReturnCode.Terminated
 
@@ -734,7 +734,7 @@ end
     u0_stische = Array(StiefelScheifele(Cartesian(u0), p.μ, ϕ₀, stische_config))
 
     prob = ODEProblem(EOM!, u0_stische, tspan, p)
-    sol = solve(prob, VCABM(); abstol=1e-13, reltol=1e-13, callback=callback_set)
+    sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13, callback=callback_set)
 
     @assert sol.retcode == ReturnCode.Terminated
 
@@ -754,6 +754,5 @@ end
 
     final_state = Cartesian(StiefelScheifele(sol.u[end]), p.μ, sol.t[end], stische_config)
 
-    #TODO: IS THIS A BUG?
-    @test final_state ≈ expected_end rtol = 3e-1
+    @test final_state ≈ expected_end rtol = 1e-4
 end

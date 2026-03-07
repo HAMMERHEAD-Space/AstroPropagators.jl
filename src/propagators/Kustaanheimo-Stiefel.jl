@@ -1,6 +1,21 @@
 export KS_EOM, KS_EOM!
 export KS_time_condition, end_KS_integration, impulsive_burn_ks!, KS_burn
 
+"""
+    KS_EOM(u, p, ϕ, models, config)
+
+Equations of motion for the Kustaanheimo-Stiefel (KS) regularized formulation.
+
+# Arguments
+- `u::AbstractArray`: The KS state vector `[KSp₁..₄, KSv₁..₄, h, τ]`.
+- `p::ComponentVector`: Parameter vector containing `μ` and `JD`.
+- `ϕ::Number`: The independent variable (fictitious time).
+- `models::AbstractDynamicsModel`: Force model composition.
+- `config::RegularizedCoordinateConfig`: Regularization configuration (DU, TU, time element type).
+
+# Returns
+- `SVector{10}`: Instantaneous rate of change of the KS state.
+"""
 function KS_EOM(
     u::AbstractArray,
     p::ComponentVector,
@@ -88,6 +103,11 @@ function KS_EOM(
     )
 end
 
+"""
+    KS_EOM!(du, u, p, ϕ, models, config)
+
+In-place version of [`KS_EOM`](@ref).
+"""
 function KS_EOM!(
     du::AbstractArray,
     u::AbstractArray,
@@ -156,29 +176,33 @@ function end_KS_integration(stop_time::Number, config::RegularizedCoordinateConf
 end
 
 """
-    impulsive_burn_ks!(integrator, ΔV, config)
+    impulsive_burn_ks!(integrator, ΔV, config; frame=InertialFrame())
 
-Applies an impulsive maneuver `ΔV` to a KS state within a
+Apply an instantaneous velocity change to a K-S state within a
 `DifferentialEquations.jl` integrator.
 
+The `ΔV` vector is interpreted in the reference frame specified by `frame`
+(see `InertialFrame`, `RTNFrame`, `VNBFrame`).
 """
 function impulsive_burn_ks!(
-    integrator::T, ΔV::AbstractVector, config::RegularizedCoordinateConfig
+    integrator::T,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
 ) where {T<:SciMLBase.DEIntegrator}
-    # Pass phi separately to coordinate transformations
     cart_state = Cartesian(KustaanheimoStiefel(integrator.u), integrator.p.μ, config)
+    ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
 
-    new_state = cart_state + SVector{6}(0, 0, 0, ΔV[1], ΔV[2], ΔV[3])
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
     new_cart_state = Cartesian(new_state...)
 
     t_maneuver = get_KS_time(integrator.u, config)
 
-    # Create new config for the maneuver with updated t₀
     maneuver_config = RegularizedCoordinateConfig(
         config.DU, config.TU, config.W, t_maneuver, config.flag_time
     )
 
-    # Convert back to KS using the phi from the maneuver time
     integrator.u = params(
         KustaanheimoStiefel(new_cart_state, integrator.p.μ, maneuver_config)
     )
@@ -187,16 +211,22 @@ function impulsive_burn_ks!(
 end
 
 """
-    KS_burn(burn_time, ΔV, config)
+    KS_burn(burn_time, ΔV, config; frame=InertialFrame())
 
 Returns a `ContinuousCallback` which triggers an `impulsive_burn_ks!`
 maneuver at a specified `burn_time`.
 
+The `ΔV` is interpreted in the given `frame` (default: `InertialFrame`).
 """
-function KS_burn(burn_time::Number, ΔV::AbstractVector, config::RegularizedCoordinateConfig)
+function KS_burn(
+    burn_time::Number,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
+)
     ContinuousCallback(
         (u, ϕ, integrator) ->
             KS_time_condition(u, ϕ, integrator, config; event_time=burn_time),
-        (integrator) -> impulsive_burn_ks!(integrator, ΔV, config),
+        (integrator) -> impulsive_burn_ks!(integrator, ΔV, config; frame),
     )
 end

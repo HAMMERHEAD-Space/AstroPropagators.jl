@@ -1,22 +1,17 @@
 export Milankovich_EOM, Milankovich_EOM!
 """
-    function Milankovich_EOM(
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    Milankovich_EOM(u, p, t, models)
 
-Milankovich propagation schema for orbital trajectories
+Milankovich propagation schema for orbital trajectories.
 
-Arguments:
--`u::AbstractVector`: The current Milankovich state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
+# Arguments
+- `u::AbstractVector`: The current Milankovich state `[Hx, Hy, Hz, ex, ey, ez, L]`.
+- `p::ComponentVector`: The parameter vector containing `μ` and `JD`.
+- `t::Number`: The current time.
+- `models::AbstractDynamicsModel`: Force model composition.
 
-Returns:
--`du::AbstractVector`: Instantenous rate of change of the current state with respect to time.
+# Returns
+- `SVector{7}`: Instantaneous rate of change of the Milankovich state.
 """
 function Milankovich_EOM(
     u::AbstractVector, p::ComponentVector, t::Number, models::AbstractDynamicsModel
@@ -24,14 +19,14 @@ function Milankovich_EOM(
     Hx, Hy, Hz, _, _, _, _ = u
     μ::Number = p.μ
 
-    u_cart = AstroCoords.Mil2cart(u, μ)
+    u_cart = Cartesian(Milankovich(u), μ)
 
     r = SVector{3}(u_cart[1], u_cart[2], u_cart[3])
     v = SVector{3}(u_cart[4], u_cart[5], u_cart[6])
 
     ad =
         build_dynamics_model(u_cart, p, t, models) -
-        acceleration(u_cart, p, t, KeplerianGravityAstroModel(μ))
+        acceleration(u_cart, p, t, KeplerianGravityAstroModel(; μ=μ))
 
     H = SVector{3}(Hx, Hy, Hz)
     ẑ = SVector{3}(0.0, 0.0, 1.0)
@@ -46,25 +41,9 @@ function Milankovich_EOM(
 end
 
 """
-    function Milankovich_EOM!(
-        du::AbstractVector,
-        u::AbstractVector,
-        p::ComponentVector,
-        t::Number,
-        models::AbstractDynamicsModel,
-    )
+    Milankovich_EOM!(du, u, p, t, models)
 
-Milankovich propagation schema for orbital trajectories
-
-Arguments:
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractVector`: The current Milankovich state.
--`p::ComponentVector`: The parameter vector, the simulation start date JD and the central body gravitational parameter.
--`t::Number`: The current time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
-
-Returns:
-- `nothing`
+In-place version of [`Milankovich_EOM`](@ref).
 """
 function Milankovich_EOM!(
     du::AbstractVector,

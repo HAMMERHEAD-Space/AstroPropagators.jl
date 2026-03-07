@@ -4,8 +4,8 @@ using AstroCoords
 using AstroForceModels
 using ComponentArrays
 using LinearAlgebra
-using OrdinaryDiffEqAdamsBashforthMoulton
 using OrdinaryDiffEqCore
+using OrdinaryDiffEqVerner
 using SciMLBase
 using StaticArraysCore
 
@@ -23,6 +23,7 @@ include("propagators/Kustaanheimo-Stiefel.jl")
 include("propagators/Milankovich.jl")
 include("propagators/Stiefel-Scheifele.jl")
 include("propagators/USM.jl")
+include("propagators/GEqOE.jl")
 
 # Events
 include("events/impulsive_maneuvers.jl")

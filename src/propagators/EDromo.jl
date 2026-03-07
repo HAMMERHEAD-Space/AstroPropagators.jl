@@ -3,30 +3,19 @@ export EDromo_time_condition, end_EDromo_integration
 export EDromo_burn, impulsive_burn_edromo!
 
 """
-function EDromo_EOM(
-    u::AbstractArray,
-    p::ComponentVector,
-    ϕ::Number,
-    models::AbstractDynamicsModel,
-    config::RegularizedCoordinateConfig,
-)
+    EDromo_EOM(u, p, ϕ, models, config)
 
-Computes the equations of motion for the EDromo formulation. The formulation is based on [1] and [2].
+Equations of motion for the EDromo formulation.
 
 # Arguments
--`u::AbstractArray`: The EDromo state vector `[ζ₁, ζ₂, ζ₃, ζ₄, ζ₅, ζ₆, ζ₇, ζ₈]`.
--`p::ComponentVector`: A `ComponentVector` containing parameters for the propagation,
-  including the gravitational parameter `μ` and the initial Julian Date `JD`.
--`ϕ::Number`: The independent variable, which is the fictitious time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
--`config::RegularizedCoordinateConfig`: Configuration struct containing EDromo formulation parameters.
+- `u::AbstractArray`: The EDromo state vector `[ζ₁, ζ₂, ζ₃, ζ₄, ζ₅, ζ₆, ζ₇, ζ₈]`.
+- `p::ComponentVector`: Parameter vector containing `μ` and `JD`.
+- `ϕ::Number`: The independent variable (fictitious time).
+- `models::AbstractDynamicsModel`: Force model composition.
+- `config::RegularizedCoordinateConfig`: Regularization configuration (DU, TU, time element type).
 
-# References
-
-[1] Baù, G., Bombardelli, C., Peláez, J., and Lorenzini, E., "Nonsingular
-    orbital elements for special perturbations in the two-body problem".
-    MNRAS 454(3), pp. 2890-2908. 2015.
-[2] Amato, Davide. "THALASSA: Orbit propagator for near-Earth and cislunar space." Astrophysics Source Code Library (2019): ascl-1905.
+# Returns
+- `SVector{8}`: Instantaneous rate of change of the EDromo state.
 """
 function EDromo_EOM(
     u::AbstractArray,
@@ -131,32 +120,9 @@ function EDromo_EOM(
 end
 
 """
-function EDromo_EOM!(
-    du::AbstractVector,
-    u::AbstractArray,
-    p::ComponentVector,
-    ϕ::Number,
-    models::AbstractDynamicsModel,
-    config::RegularizedCoordinateConfig,
-)
+    EDromo_EOM!(du, u, p, ϕ, models, config)
 
-Computes the equations of motion for the EDromo formulation. The formulation is based on [1] and [2].
-
-# Arguments
--`du::AbstractVector`: In-place vector to store the instantenous rate of change of the current state with respect to time.
--`u::AbstractArray`: The EDromo state vector `[ζ₁, ζ₂, ζ₃, ζ₄, ζ₅, ζ₆, ζ₇, ζ₈]`.
--`p::ComponentVector`: A `ComponentVector` containing parameters for the propagation,
-  including the gravitational parameter `μ` and the initial Julian Date `JD`.
--`ϕ::Number`: The independent variable, which is the fictitious time.
--`models::AbstractDynamicsModel`: Tuple of the acceleration models.
--`config::RegularizedCoordinateConfig`: Configuration struct containing EDromo formulation parameters.
-
-# References
-
-[1] Baù, G., Bombardelli, C., Peláez, J., and Lorenzini, E., "Nonsingular
-    orbital elements for special perturbations in the two-body problem".
-    MNRAS 454(3), pp. 2890-2908. 2015.
-[2] Amato, Davide. "THALASSA: Orbit propagator for near-Earth and cislunar space." Astrophysics Source Code Library (2019): ascl-1905.
+In-place version of [`EDromo_EOM`](@ref).
 """
 function EDromo_EOM!(
     du::AbstractVector,
@@ -249,29 +215,33 @@ function end_EDromo_integration(stop_time::Number, config::RegularizedCoordinate
 end
 
 """
-    impulsive_burn_edromo!(integrator, ΔV, config)
+    impulsive_burn_edromo!(integrator, ΔV, config; frame=InertialFrame())
 
-Applies an impulsive maneuver `ΔV` to an EDromo state within a
+Apply an instantaneous velocity change to an EDromo state within a
 `DifferentialEquations.jl` integrator.
 
+The `ΔV` vector is interpreted in the reference frame specified by `frame`
+(see `InertialFrame`, `RTNFrame`, `VNBFrame`).
 """
 function impulsive_burn_edromo!(
-    integrator::T, ΔV::AbstractVector, config::RegularizedCoordinateConfig
+    integrator::T,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
 ) where {T<:SciMLBase.DEIntegrator}
-    # Pass phi separately to coordinate transformations
     cart_state = Cartesian(EDromo(integrator.u), integrator.p.μ, integrator.t, config)
+    ΔV_inertial = transform_to_inertial(SVector{3}(ΔV[1], ΔV[2], ΔV[3]), cart_state, frame)
 
-    new_state = cart_state + SVector{6}(0, 0, 0, ΔV[1], ΔV[2], ΔV[3])
+    new_state =
+        cart_state + SVector{6}(0, 0, 0, ΔV_inertial[1], ΔV_inertial[2], ΔV_inertial[3])
     new_cart_state = Cartesian(new_state...)
 
     t_maneuver = get_EDromo_time(integrator.u, integrator.t, config)
 
-    # Create new config for the maneuver with updated t₀
     maneuver_config = RegularizedCoordinateConfig(
         config.DU, config.TU, config.W, t_maneuver, config.flag_time
     )
 
-    # Convert back to EDromo using the phi from the maneuver time
     integrator.u = params(
         EDromo(new_cart_state, integrator.p.μ, integrator.t, maneuver_config)
     )
@@ -280,18 +250,22 @@ function impulsive_burn_edromo!(
 end
 
 """
-    EDromo_burn(burn_time, ΔV, config)
+    EDromo_burn(burn_time, ΔV, config; frame=InertialFrame())
 
 Returns a `ContinuousCallback` which triggers an `impulsive_burn_edromo!`
 maneuver at a specified `burn_time`.
 
+The `ΔV` is interpreted in the given `frame` (default: `InertialFrame`).
 """
 function EDromo_burn(
-    burn_time::Number, ΔV::AbstractVector, config::RegularizedCoordinateConfig
+    burn_time::Number,
+    ΔV::AbstractVector,
+    config::RegularizedCoordinateConfig;
+    frame::AbstractThrustFrame=InertialFrame(),
 )
     ContinuousCallback(
         (u, ϕ, integrator) ->
             EDromo_time_condition(u, ϕ, integrator, config; event_time=burn_time),
-        (integrator) -> impulsive_burn_edromo!(integrator, ΔV, config),
+        (integrator) -> impulsive_burn_edromo!(integrator, ΔV, config; frame),
     )
 end
