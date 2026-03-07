@@ -194,7 +194,7 @@ end
     @test Cartesian(USM7(sol.u[end]), p.μ) ≈ expected_end rtol=1e-3
 end
 
-@testset "USM6 Propagator High-Fidelity 2" begin
+@testset "USM6 Propagator High-Fidelity Regression" begin
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
 
     SpaceIndices.init()

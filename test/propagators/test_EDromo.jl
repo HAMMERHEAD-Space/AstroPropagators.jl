@@ -298,7 +298,7 @@ end
     @test final_state ≈ expected_end rtol=1e-3
 end
 
-@testset "EDromo Propagator High-Fidelity Constant Time 2" begin
+@testset "EDromo Propagator High-Fidelity Regression Constant Time" begin
     JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
     p = ComponentVector(; JD=JD)
 
