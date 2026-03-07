@@ -150,9 +150,14 @@ using OrdinaryDiffEqVerner, SciMLBase
 # Using the same force model and config setup from above...
 u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
 
+# In-place (what propagate! uses internally)
 f!(du, u, p, t) = GEqOE_EOM!(du, u, p, t, models, config)
-
 prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = GEqOE_EOM(u, p, t, models, config)
+prob = ODEProblem{false}(f, u0, tspan, p)
 sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
 # Convert back to Cartesian

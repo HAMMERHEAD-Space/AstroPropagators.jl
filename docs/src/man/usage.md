@@ -77,16 +77,24 @@ tspan = (0.0, 86400.0)
 sol = propagate(CowellPropagator(), u0_cart, p, models, tspan)
 ```
 
-## The `propagate` API
+## The `propagate` / `propagate!` API
 
-The propagator type is always the first argument. Standard and regularized propagators have different signatures:
+AstroPropagators provides two propagation functions following Julia naming conventions:
+
+- **`propagate`** — out-of-place ODE problem (`ODEProblem{false}`). Best for small state vectors and `StaticArrays`.
+- **`propagate!`** — in-place ODE problem (`ODEProblem{true}`). Preferred for mutable arrays and larger systems.
+
+Both accept the same arguments. The propagator type is always the first argument.
+Standard and regularized propagators have different signatures:
 
 ```julia
 # Standard propagators — no config needed
 sol = propagate(CowellPropagator(), u0, p, models, tspan)
+sol = propagate!(CowellPropagator(), u0, p, models, tspan)
 
 # Regularized propagators — config is a required positional argument
 sol = propagate(EDromoPropagator(), u0, p, models, tspan, config)
+sol = propagate!(EDromoPropagator(), u0, p, models, tspan, config)
 ```
 
 ### Keyword Arguments
@@ -160,27 +168,56 @@ cart_final = Array(Cartesian(Keplerian(sol.u[end]), μ))
 cart_final = Array(Cartesian(GEqOE(sol.u[end]), μ, config))
 ```
 
+## The `eom` / `eom!` Dispatch Layer
+
+Both `propagate` and `propagate!` are thin wrappers around the `eom` / `eom!` dispatch
+layer. You can use these directly when building custom `ODEProblem`s:
+
+- **`eom(prop, u, p, t, models)`** — out-of-place, returns the derivative vector
+- **`eom!(prop, du, u, p, t, models)`** — in-place, writes into `du`
+
+For regularized propagators, both take an additional `config` argument:
+
+```julia
+# Out-of-place
+du = eom(CowellPropagator(), u, p, t, models)
+du = eom(EDromoPropagator(), u, p, ϕ, models, config)
+
+# In-place
+eom!(CowellPropagator(), du, u, p, t, models)
+eom!(EDromoPropagator(), du, u, p, ϕ, models, config)
+```
+
+Each dispatch delegates to the underlying EOM function (e.g., `eom!(CowellPropagator(), ...)`
+calls `Cowell_EOM!(...)`).
+
 ## Using `ODEProblem` Directly
 
-The `propagate` function is a thin wrapper around `ODEProblem` + `solve`. For full
-control — custom callbacks, event handling, or composing the EOM closure into a larger
-system — you can build the problem yourself.
+The `propagate` / `propagate!` functions are thin wrappers around `ODEProblem` + `solve`.
+For full control — custom callbacks, event handling, or composing the EOM closure into a
+larger system — you can build the problem yourself.
 
 ### Standard Propagators
 
 ```julia
 using OrdinaryDiffEqVerner, SciMLBase
 
+# In-place (ODEProblem{true})
 f!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
-
 prob = ODEProblem(f!, u0_cart, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (ODEProblem{false})
+f(u, p, t) = Cowell_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0_cart, tspan, p)
 sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
-The `eom!` dispatch layer works identically:
+The `eom` / `eom!` dispatch layer works identically:
 
 ```julia
 f!(du, u, p, t) = eom!(CowellPropagator(), du, u, p, t, models)
+f(u, p, t) = eom(CowellPropagator(), u, p, t, models)
 ```
 
 ### Regularized Propagators
@@ -217,21 +254,29 @@ sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
 ## Extending with New Propagators
 
-Define a new propagator by subtyping and implementing `eom!`:
+Define a new propagator by subtyping and implementing both `eom` and `eom!`:
 
 ```julia
 # Standard propagator
 struct MyPropagator <: AbstractStandardPropagator end
 
+@inline function AstroPropagators.eom(::MyPropagator, u, p, t, models)
+    # compute and return derivative vector (out-of-place)
+end
+
 @inline function AstroPropagators.eom!(::MyPropagator, du, u, p, t, models)
-    # compute derivatives, write into du
+    # compute derivatives, write into du (in-place)
 end
 
 # Regularized propagator
 struct MyRegPropagator <: AbstractRegularizedPropagator end
 
+@inline function AstroPropagators.eom(::MyRegPropagator, u, p, t, models, config)
+    # compute and return derivative vector (out-of-place)
+end
+
 @inline function AstroPropagators.eom!(::MyRegPropagator, du, u, p, t, models, config)
-    # compute derivatives, write into du
+    # compute derivatives, write into du (in-place)
 end
 ```
 

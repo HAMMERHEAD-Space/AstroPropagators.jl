@@ -184,14 +184,19 @@ using OrdinaryDiffEqVerner, SciMLBase
 # Using the same force model setup from above...
 u0 = Array(USM7(Cartesian(u0_cart), μ))
 
+# In-place (what propagate! uses internally)
 f!(du, u, p, t) = USM7_EOM!(du, u, p, t, models)
-
 prob = ODEProblem(f!, u0, tspan, p)
 sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = USM7_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
 # Similarly for USM6 and USMEM:
-# f!(du, u, p, t) = USM6_EOM!(du, u, p, t, models)
-# f!(du, u, p, t) = USMEM_EOM!(du, u, p, t, models)
+# f(u, p, t) = USM6_EOM(u, p, t, models)
+# f(u, p, t) = USMEM_EOM(u, p, t, models)
 ```
 
 ## References

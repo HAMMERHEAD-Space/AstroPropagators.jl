@@ -113,9 +113,18 @@ using OrdinaryDiffEqVerner, SciMLBase
 u0 = Array(StiefelScheifele(Cartesian(u0_cart), μ, ϕ₀, config))
 tspan = (ϕ₀, ϕ₀ + 6π)
 
+# In-place (what propagate! uses internally)
 f!(du, u, p, t) = StiSche_EOM!(du, u, p, t, models, config)
-
 prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(
+    prob, Vern9();
+    abstol=1e-13, reltol=1e-13,
+    callback=end_StiSche_integration(86400.0, config),
+)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = StiSche_EOM(u, p, t, models, config)
+prob = ODEProblem{false}(f, u0, tspan, p)
 sol = solve(
     prob, Vern9();
     abstol=1e-13, reltol=1e-13,

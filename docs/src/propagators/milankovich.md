@@ -138,9 +138,14 @@ using OrdinaryDiffEqVerner, SciMLBase
 # Using the same force model setup from above...
 u0 = Array(Milankovich(Cartesian(u0_cart), μ))
 
+# In-place (what propagate! uses internally)
 f!(du, u, p, t) = Milankovich_EOM!(du, u, p, t, models)
-
 prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = Milankovich_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0, tspan, p)
 sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 

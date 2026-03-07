@@ -102,26 +102,31 @@ sol = propagate(CowellPropagator(), u0_cart, p, models, tspan)
 ### Using `ODEProblem` Directly
 
 For full control over the integration — custom callbacks, event handling, or composing
-the EOM closure into a larger system — you can bypass `propagate` and build the
-`ODEProblem` yourself.
+the EOM closure into a larger system — you can bypass `propagate` / `propagate!` and
+build the `ODEProblem` yourself.
 
 ```julia
 using OrdinaryDiffEqVerner, SciMLBase
 
 # Using the same force model setup from above...
 
-# Build the EOM closure — captures models (and config for regularized propagators)
+# In-place (what propagate! uses internally)
 f!(du, u, p, t) = Cowell_EOM!(du, u, p, t, models)
-
-# Or equivalently, through the dispatch layer:
-# f!(du, u, p, t) = eom!(CowellPropagator(), du, u, p, t, models)
-
 prob = ODEProblem(f!, u0_cart, tspan, p)
+sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = Cowell_EOM(u, p, t, models)
+prob = ODEProblem{false}(f, u0_cart, tspan, p)
 sol = solve(prob, Vern9(); abstol=1e-13, reltol=1e-13)
 ```
 
-This is exactly what `propagate` does internally, so the two approaches produce
-identical results.
+Equivalently, through the dispatch layer:
+
+```julia
+f!(du, u, p, t) = eom!(CowellPropagator(), du, u, p, t, models)
+f(u, p, t) = eom(CowellPropagator(), u, p, t, models)
+```
 
 ## Optimal Use Cases
 - **High-precision applications**: Precise orbit determination, collision analysis
