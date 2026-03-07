@@ -30,6 +30,7 @@ include("test_helpers.jl")
     include("events/test_impulsive_maneuvers.jl")
     include("test_cross_formulation.jl")
     include("test_roundtrip.jl")
+    include("test_api.jl")
 end
 
 # Differentiability tests are gated behind an environment variable to keep the default
