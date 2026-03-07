@@ -39,7 +39,7 @@
         Vern9();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_KS_integration(86400.0, ks_config),
+        callback=build_termination_callback(86400.0, KustaanheimoStiefel, ks_config),
     )
 
     get_KS_time(sol.u[end], ks_config)
@@ -101,7 +101,7 @@ end
         Vern9();
         abstol=1e-15,
         reltol=1e-15,
-        callback=end_KS_integration(86400.0, ks_config),
+        callback=build_termination_callback(86400.0, KustaanheimoStiefel, ks_config),
     )
 
     NRG = orbitalNRG.(KustaanheimoStiefel.(sol.u), μ, [ks_config])
@@ -188,7 +188,7 @@ end
         Vern9();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_KS_integration(3.0 * 86400.0, ks_config),
+        callback=build_termination_callback(3.0 * 86400.0, KustaanheimoStiefel, ks_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
@@ -273,7 +273,7 @@ end
         Vern9();
         abstol=1e-13,
         reltol=1e-13,
-        callback=end_KS_integration(3.0 * 86400.0, ks_config),
+        callback=build_termination_callback(3.0 * 86400.0, KustaanheimoStiefel, ks_config),
     )
 
     @assert sol.retcode == ReturnCode.Terminated
