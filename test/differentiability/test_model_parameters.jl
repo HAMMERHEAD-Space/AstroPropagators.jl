@@ -55,7 +55,7 @@ const _ATMOSPHERE_MODELS = (
     ("JR1971", JR1971()),
     ("MSIS2000", MSIS2000()),
     ("ExpAtmo", ExpAtmo()),
-    ("None", None()),
+    ("NoAtmosphere", NoAtmosphere()),
 )
 
 const _satellite_drag_model = CannonballFixedDrag(0.2)
