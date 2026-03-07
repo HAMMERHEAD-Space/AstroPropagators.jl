@@ -183,7 +183,7 @@ Apply an instantaneous velocity change to a GEqOE state within a
 `DifferentialEquations.jl` integrator.
 
 The `ΔV` vector is interpreted in the reference frame specified by `frame`
-(see [`InertialFrame`](@ref), [`RTNFrame`](@ref), [`VNBFrame`](@ref)).
+(see `InertialFrame`, `RTNFrame`, `VNBFrame`).
 """
 function impulsive_burn_geqoe!(
     integrator::T,
@@ -209,7 +209,7 @@ end
 Returns a `ContinuousCallback` which triggers an [`impulsive_burn_geqoe!`](@ref)
 maneuver at a specified `burn_time`.
 
-The `ΔV` is interpreted in the given `frame` (default: [`InertialFrame`](@ref)).
+The `ΔV` is interpreted in the given `frame` (default: `InertialFrame`).
 """
 function GEqOE_burn(
     burn_time::Number,

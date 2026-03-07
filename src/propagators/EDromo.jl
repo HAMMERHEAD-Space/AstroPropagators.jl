@@ -221,7 +221,7 @@ Apply an instantaneous velocity change to an EDromo state within a
 `DifferentialEquations.jl` integrator.
 
 The `ΔV` vector is interpreted in the reference frame specified by `frame`
-(see [`InertialFrame`](@ref), [`RTNFrame`](@ref), [`VNBFrame`](@ref)).
+(see `InertialFrame`, `RTNFrame`, `VNBFrame`).
 """
 function impulsive_burn_edromo!(
     integrator::T,
@@ -255,7 +255,7 @@ end
 Returns a `ContinuousCallback` which triggers an `impulsive_burn_edromo!`
 maneuver at a specified `burn_time`.
 
-The `ΔV` is interpreted in the given `frame` (default: [`InertialFrame`](@ref)).
+The `ΔV` is interpreted in the given `frame` (default: `InertialFrame`).
 """
 function EDromo_burn(
     burn_time::Number,

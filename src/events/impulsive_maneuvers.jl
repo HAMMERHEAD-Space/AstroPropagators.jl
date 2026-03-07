@@ -11,9 +11,9 @@ Apply an instantaneous velocity change (impulsive burn) to the integrator state.
 
 The `ΔV` vector is interpreted in the reference frame specified by `frame`:
 
-- [`InertialFrame()`](@ref): `ΔV` components are inertial (ECI) — no rotation needed (default)
-- [`RTNFrame()`](@ref): `ΔV = [ΔV_R, ΔV_T, ΔV_N]` in the Radial–Transverse–Normal frame
-- [`VNBFrame()`](@ref): `ΔV = [ΔV_V, ΔV_N, ΔV_B]` in the Velocity–Normal–Binormal frame
+- `InertialFrame()`: `ΔV` components are inertial (ECI) — no rotation needed (default)
+- `RTNFrame()`: `ΔV = [ΔV_R, ΔV_T, ΔV_N]` in the Radial–Transverse–Normal frame
+- `VNBFrame()`: `ΔV = [ΔV_V, ΔV_N, ΔV_B]` in the Velocity–Normal–Binormal frame
 
 # Arguments
 - `integrator::SciMLBase.DEIntegrator`: The differential equation integrator object.

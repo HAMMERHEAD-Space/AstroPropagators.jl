@@ -135,7 +135,7 @@ end
     )
 
 Propagate an orbit using a regularized formulation that requires a
-[`RegularizedCoordinateConfig`](@ref).
+`RegularizedCoordinateConfig`.
 
 # Arguments
 - `prop`: Propagator type (e.g., `EDromoPropagator()`, `GEqOEPropagator()`).

@@ -182,7 +182,7 @@ Apply an instantaneous velocity change to a K-S state within a
 `DifferentialEquations.jl` integrator.
 
 The `ΔV` vector is interpreted in the reference frame specified by `frame`
-(see [`InertialFrame`](@ref), [`RTNFrame`](@ref), [`VNBFrame`](@ref)).
+(see `InertialFrame`, `RTNFrame`, `VNBFrame`).
 """
 function impulsive_burn_ks!(
     integrator::T,
@@ -216,7 +216,7 @@ end
 Returns a `ContinuousCallback` which triggers an `impulsive_burn_ks!`
 maneuver at a specified `burn_time`.
 
-The `ΔV` is interpreted in the given `frame` (default: [`InertialFrame`](@ref)).
+The `ΔV` is interpreted in the given `frame` (default: `InertialFrame`).
 """
 function KS_burn(
     burn_time::Number,
