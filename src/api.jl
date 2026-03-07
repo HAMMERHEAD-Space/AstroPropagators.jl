@@ -36,12 +36,16 @@ struct GEqOEPropagator <: AbstractRegularizedPropagator end
 
 # ========================================================================================
 # EOM Dispatch — In-place (eom!)
-#
-# New propagators extend the API by defining:
-#   eom!(::MyPropagator, du, u, p, t, models)           for standard
-#   eom!(::MyPropagator, du, u, p, t, models, config)   for regularized
 # ========================================================================================
 
+"""
+    eom!(prop::AbstractStandardPropagator, du, u, p, t, models)
+    eom!(prop::AbstractRegularizedPropagator, du, u, p, t, models, config)
+
+In-place equations of motion. Computes derivatives and writes them into `du`.
+Dispatches to the underlying EOM function for the given propagator type
+(e.g., `eom!(CowellPropagator(), ...)` calls `Cowell_EOM!(...)`).
+"""
 @inline eom!(::CowellPropagator, du, u, p, t, models) = Cowell_EOM!(du, u, p, t, models)
 @inline eom!(::GaussVEPropagator, du, u, p, t, models) = GaussVE_EOM!(du, u, p, t, models)
 @inline eom!(::MilankovichPropagator, du, u, p, t, models) = Milankovich_EOM!(
@@ -66,12 +70,16 @@ struct GEqOEPropagator <: AbstractRegularizedPropagator end
 
 # ========================================================================================
 # EOM Dispatch — Out-of-place (eom)
-#
-# New propagators extend the API by defining:
-#   eom(::MyPropagator, u, p, t, models)           for standard
-#   eom(::MyPropagator, u, p, t, models, config)   for regularized
 # ========================================================================================
 
+"""
+    eom(prop::AbstractStandardPropagator, u, p, t, models)
+    eom(prop::AbstractRegularizedPropagator, u, p, t, models, config)
+
+Out-of-place equations of motion. Returns the derivative vector as an `SVector`.
+Dispatches to the underlying EOM function for the given propagator type
+(e.g., `eom(CowellPropagator(), ...)` calls `Cowell_EOM(...)`).
+"""
 @inline eom(::CowellPropagator, u, p, t, models) = Cowell_EOM(u, p, t, models)
 @inline eom(::GaussVEPropagator, u, p, t, models) = GaussVE_EOM(u, p, t, models)
 @inline eom(::MilankovichPropagator, u, p, t, models) = Milankovich_EOM(u, p, t, models)
@@ -137,8 +145,9 @@ function propagate(
     reltol::Real=1e-13,
     kwargs...,
 )
+    u0_s = SVector{length(u0)}(u0)
     f(u, p, t) = eom(prop, u, p, t, models)
-    prob = ODEProblem{false}(f, u0, tspan, p)
+    prob = ODEProblem{false}(f, u0_s, tspan, p)
     return solve(prob, solver; reltol, abstol, kwargs...)
 end
 
@@ -172,8 +181,9 @@ function propagate(
     reltol::Real=1e-13,
     kwargs...,
 )
+    u0_s = SVector{length(u0)}(u0)
     f(u, p, t) = eom(prop, u, p, t, models, config)
-    prob = ODEProblem{false}(f, u0, tspan, p)
+    prob = ODEProblem{false}(f, u0_s, tspan, p)
     return solve(prob, solver; reltol, abstol, kwargs...)
 end
 
