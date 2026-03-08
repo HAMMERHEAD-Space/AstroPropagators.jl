@@ -140,4 +140,3 @@ function KS_matrix(u::AbstractVector)
         -u[1],
     )
 end
-

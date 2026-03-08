@@ -177,4 +177,3 @@ The orbital frame is defined by the radial, tangential, and normal directions.
 
     return R2 * R1_T * v_inertial
 end
-

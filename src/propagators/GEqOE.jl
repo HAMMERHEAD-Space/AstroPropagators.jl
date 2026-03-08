@@ -174,4 +174,3 @@ function GEqOE_EOM!(
 
     return nothing
 end
-
