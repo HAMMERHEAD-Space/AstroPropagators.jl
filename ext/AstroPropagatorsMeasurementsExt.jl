@@ -116,8 +116,8 @@ end
 Return a condition function that is zero when the angular separation between the
 spacecraft and a beacon, as seen from an observer, crosses `threshold` [rad].
 
-- `beacon_fn(JD)` returns the beacon's ECI position [km] (e.g., Sun).
-- `observer_fn(JD)` returns the observer's ECI position [km] (e.g., ground station).
+- `beacon_fn(JD)` returns the beacon's ECI position in km (e.g., Sun).
+- `observer_fn(JD)` returns the observer's ECI position in km (e.g., ground station).
 """
 function AstroPropagators.angular_separation_condition(
     ::Type{C}, beacon_fn, observer_fn, threshold::Number
