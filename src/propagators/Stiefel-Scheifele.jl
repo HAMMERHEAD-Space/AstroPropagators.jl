@@ -121,4 +121,3 @@ function StiSche_EOM!(
     du .= StiSche_EOM(u, p, ϕ, models, config)
     return nothing
 end
-
