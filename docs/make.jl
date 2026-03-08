@@ -1,5 +1,6 @@
 using Documenter
 using AstroPropagators
+using AstroMeasurements
 
 makedocs(;
     modules=[AstroPropagators],

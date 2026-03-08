@@ -318,13 +318,5 @@ build_maneuver_callback
 build_maneuver_schedule
 build_event_callback
 build_termination_callback
-TimeTrigger
-EventTrigger
-FixedDeltaV
-ComputedDeltaV
-TerminateAction
-LogAction
-ContinueAction
-ManeuverAction
 impulsive_burn!
 ```
