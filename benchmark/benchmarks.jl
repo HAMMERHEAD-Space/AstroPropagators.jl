@@ -80,21 +80,50 @@ const _state_usm6 = Array(USM6(Cartesian(_state_cart), _μ_kep))
 const _state_usmem = Array(USMEM(Cartesian(_state_cart), _μ_kep))
 
 # ---------------------
-# Regularized propagator states
+# Regularized configs & states — Keplerian (W=0, no perturbation)
 # ---------------------
-const _config_pt = RegularizedCoordinateConfig(
-    _state_cart, _μ_kep; W=-1e-2, t₀=0.0, flag_time=PhysicalTime()
+const _config_pt_kep = RegularizedCoordinateConfig(
+    _state_cart, _μ_kep; W=0.0, t₀=0.0, flag_time=PhysicalTime()
 )
-const _ϕ_pt = AstroCoords.compute_initial_phi(_state_cart, _μ_kep, _config_pt)
+const _ϕ_kep = AstroCoords.compute_initial_phi(_state_cart, _μ_kep, _config_pt_kep)
 
-const _state_edromo = Array(EDromo(Cartesian(_state_cart), _μ_kep, _ϕ_pt, _config_pt))
-const _state_ks = Array(KustaanheimoStiefel(Cartesian(_state_cart), _μ_kep, _config_pt))
-const _state_stische = Array(
-    StiefelScheifele(Cartesian(_state_cart), _μ_kep, _ϕ_pt, _config_pt)
+const _state_edromo_kep = Array(
+    EDromo(Cartesian(_state_cart), _μ_kep, _ϕ_kep, _config_pt_kep)
+)
+const _state_ks_kep = Array(
+    KustaanheimoStiefel(Cartesian(_state_cart), _μ_kep, _config_pt_kep)
+)
+const _state_stische_kep = Array(
+    StiefelScheifele(Cartesian(_state_cart), _μ_kep, _ϕ_kep, _config_pt_kep)
 )
 
-const _config_geqoe = RegularizedCoordinateConfig(; W=-1e-2)
-const _state_geqoe = Array(GEqOE(Cartesian(_state_cart), _μ_kep, _config_geqoe))
+const _config_geqoe_kep = RegularizedCoordinateConfig(; W=0.0)
+const _state_geqoe_kep = Array(GEqOE(Cartesian(_state_cart), _μ_kep, _config_geqoe_kep))
+
+# ---------------------
+# Regularized configs & states — Full force model (W from perturbation potential at t₀)
+# ---------------------
+const _W_full =
+    potential(Cartesian(_state_cart), _p_full, 0.0, _grav_model) -
+    potential(Cartesian(_state_cart), _p_full, 0.0, KeplerianGravityAstroModel(; μ=_μ_full))
+
+const _config_pt_full = RegularizedCoordinateConfig(
+    _state_cart, _μ_full; W=_W_full, t₀=0.0, flag_time=PhysicalTime()
+)
+const _ϕ_full = AstroCoords.compute_initial_phi(_state_cart, _μ_full, _config_pt_full)
+
+const _state_edromo_full = Array(
+    EDromo(Cartesian(_state_cart), _μ_full, _ϕ_full, _config_pt_full)
+)
+const _state_ks_full = Array(
+    KustaanheimoStiefel(Cartesian(_state_cart), _μ_full, _config_pt_full)
+)
+const _state_stische_full = Array(
+    StiefelScheifele(Cartesian(_state_cart), _μ_full, _ϕ_full, _config_pt_full)
+)
+
+const _config_geqoe_full = RegularizedCoordinateConfig(; W=_W_full)
+const _state_geqoe_full = Array(GEqOE(Cartesian(_state_cart), _μ_full, _config_geqoe_full))
 
 # =====================
 # Standard EOM benchmarks
@@ -154,49 +183,41 @@ SUITE["eom"]["standard"]["USMEM (Full)"] = @benchmarkable USMEM_EOM(
 
 # --- EDromo ---
 SUITE["eom"]["regularized"]["EDromo (Keplerian)"] = @benchmarkable EDromo_EOM(
-    $_state_edromo, $_p_kep, $_ϕ_pt, $_dynamics_kep, $_config_pt
+    $_state_edromo_kep, $_p_kep, $_ϕ_kep, $_dynamics_kep, $_config_pt_kep
 )
 SUITE["eom"]["regularized"]["EDromo (Full)"] = @benchmarkable EDromo_EOM(
-    $_state_edromo, $_p_full, $_ϕ_pt, $_dynamics_full, $_config_pt
+    $_state_edromo_full, $_p_full, $_ϕ_full, $_dynamics_full, $_config_pt_full
 )
 
 # --- Kustaanheimo-Stiefel ---
 SUITE["eom"]["regularized"]["KS (Keplerian)"] = @benchmarkable KS_EOM(
-    $_state_ks, $_p_kep, $_ϕ_pt, $_dynamics_kep, $_config_pt
+    $_state_ks_kep, $_p_kep, $_ϕ_kep, $_dynamics_kep, $_config_pt_kep
 )
 SUITE["eom"]["regularized"]["KS (Full)"] = @benchmarkable KS_EOM(
-    $_state_ks, $_p_full, $_ϕ_pt, $_dynamics_full, $_config_pt
+    $_state_ks_full, $_p_full, $_ϕ_full, $_dynamics_full, $_config_pt_full
 )
 
 # --- Stiefel-Scheifele ---
 SUITE["eom"]["regularized"]["StiSche (Keplerian)"] = @benchmarkable StiSche_EOM(
-    $_state_stische, $_p_kep, $_ϕ_pt, $_dynamics_kep, $_config_pt
+    $_state_stische_kep, $_p_kep, $_ϕ_kep, $_dynamics_kep, $_config_pt_kep
 )
 SUITE["eom"]["regularized"]["StiSche (Full)"] = @benchmarkable StiSche_EOM(
-    $_state_stische, $_p_full, $_ϕ_pt, $_dynamics_full, $_config_pt
+    $_state_stische_full, $_p_full, $_ϕ_full, $_dynamics_full, $_config_pt_full
 )
 
 # --- GEqOE ---
 SUITE["eom"]["regularized"]["GEqOE (Keplerian)"] = @benchmarkable GEqOE_EOM(
-    $_state_geqoe, $_p_kep, $_t, $_dynamics_kep, $_config_geqoe
+    $_state_geqoe_kep, $_p_kep, $_t, $_dynamics_kep, $_config_geqoe_kep
 )
 SUITE["eom"]["regularized"]["GEqOE (Full)"] = @benchmarkable GEqOE_EOM(
-    $_state_geqoe, $_p_full, $_t, $_dynamics_full, $_config_geqoe
+    $_state_geqoe_full, $_p_full, $_t, $_dynamics_full, $_config_geqoe_full
 )
 
 # =====================
 # Propagation benchmarks (2-day, full force model)
+# Reuses _*_full regularized configs/states defined above.
 # =====================
 const _tspan = (0.0, 2.0 * 86400.0)
-
-const _W_full =
-    potential(Cartesian(_state_cart), _p_full, 0.0, _grav_model) -
-    potential(Cartesian(_state_cart), _p_full, 0.0, KeplerianGravityAstroModel(; μ=_μ_full))
-
-const _config_prop = RegularizedCoordinateConfig(
-    _state_cart, _μ_full; W=_W_full, t₀=0.0, flag_time=PhysicalTime()
-)
-const _config_geqoe_prop = RegularizedCoordinateConfig(; W=_W_full)
 
 const _u0_cowell = copy(_state_cart)
 const _u0_gaussve = Array(Keplerian(Cartesian(_state_cart), _μ_full))
@@ -204,14 +225,6 @@ const _u0_milankovich = Array(Milankovich(Cartesian(_state_cart), _μ_full))
 const _u0_usm7 = Array(USM7(Cartesian(_state_cart), _μ_full))
 const _u0_usm6 = Array(USM6(Cartesian(_state_cart), _μ_full))
 const _u0_usmem = Array(USMEM(Cartesian(_state_cart), _μ_full))
-
-const _ϕ_prop = AstroCoords.compute_initial_phi(_state_cart, _μ_full, _config_prop)
-const _u0_edromo = Array(EDromo(Cartesian(_state_cart), _μ_full, _ϕ_prop, _config_prop))
-const _u0_ks = Array(KustaanheimoStiefel(Cartesian(_state_cart), _μ_full, _config_prop))
-const _u0_stische = Array(
-    StiefelScheifele(Cartesian(_state_cart), _μ_full, _ϕ_prop, _config_prop)
-)
-const _u0_geqoe = Array(GEqOE(Cartesian(_state_cart), _μ_full, _config_geqoe_prop))
 
 # --- Standard propagators ---
 SUITE["propagation"]["Cowell"] = @benchmarkable propagate(
@@ -235,16 +248,31 @@ SUITE["propagation"]["USMEM"] = @benchmarkable propagate(
 
 # --- Regularized propagators ---
 SUITE["propagation"]["EDromo"] = @benchmarkable propagate(
-    EDromoPropagator(), $_u0_edromo, $_p_full, $_dynamics_full, $_tspan, $_config_prop
+    EDromoPropagator(),
+    $_state_edromo_full,
+    $_p_full,
+    $_dynamics_full,
+    $_tspan,
+    $_config_pt_full,
 )
 SUITE["propagation"]["KS"] = @benchmarkable propagate(
-    KSPropagator(), $_u0_ks, $_p_full, $_dynamics_full, $_tspan, $_config_prop
+    KSPropagator(), $_state_ks_full, $_p_full, $_dynamics_full, $_tspan, $_config_pt_full
 )
 SUITE["propagation"]["StiSche"] = @benchmarkable propagate(
-    StiSchePropagator(), $_u0_stische, $_p_full, $_dynamics_full, $_tspan, $_config_prop
+    StiSchePropagator(),
+    $_state_stische_full,
+    $_p_full,
+    $_dynamics_full,
+    $_tspan,
+    $_config_pt_full,
 )
 SUITE["propagation"]["GEqOE"] = @benchmarkable propagate(
-    GEqOEPropagator(), $_u0_geqoe, $_p_full, $_dynamics_full, $_tspan, $_config_geqoe_prop
+    GEqOEPropagator(),
+    $_state_geqoe_full,
+    $_p_full,
+    $_dynamics_full,
+    $_tspan,
+    $_config_geqoe_full,
 )
 
 # ---------------------

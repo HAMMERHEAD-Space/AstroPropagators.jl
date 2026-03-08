@@ -13,9 +13,16 @@ OrdinaryDiffEqVerner = "79d7bb75-1356-48c1-b8c0-6832512096c2"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 
+[extensions]
+AstroPropagatorsMeasurementsExt = "AstroMeasurements"
+
+[weakdeps]
+AstroMeasurements = "8cc58f20-0515-4f53-8f08-ac69cfb2ea7c"
+
 [compat]
 AstroCoords = "0.4"
 AstroForceModels = "0.6"
+AstroMeasurements = "0.1"
 ComponentArrays = "0.15"
 LinearAlgebra = "1"
 OrdinaryDiffEqCore = "3"
@@ -43,4 +50,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["AllocCheck", "Aqua", "DifferentiationInterface", "Enzyme", "FiniteDiff", "ForwardDiff", "JET", "Mooncake", "PolyesterForwardDiff", "SatelliteToolboxAtmosphericModels", "SatelliteToolboxGravityModels", "SatelliteToolboxTransformations", "SpaceIndices", "Test", "Zygote"]
+test = ["AllocCheck", "Aqua", "AstroMeasurements", "DifferentiationInterface", "Enzyme", "FiniteDiff", "ForwardDiff", "JET", "Mooncake", "PolyesterForwardDiff", "SatelliteToolboxAtmosphericModels", "SatelliteToolboxGravityModels", "SatelliteToolboxTransformations", "SpaceIndices", "Test", "Zygote"]

@@ -2,3 +2,4 @@
 # Add custom words that should not be flagged as spelling errors
 MSIS = "MSIS"
 shepperd = "shepperd"
+MIGE = "MIGE"

@@ -340,8 +340,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = EDromo_burn(43200.0, deltaV, edromo_config)
-    end_callback = end_EDromo_integration(86400.0, edromo_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), EDromo, edromo_config
+    )
+    end_callback = build_termination_callback(86400.0, EDromo, edromo_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -409,8 +411,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = EDromo_burn(43200.0, deltaV, edromo_config)
-    end_callback = end_EDromo_integration(86400.0, edromo_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), EDromo, edromo_config
+    )
+    end_callback = build_termination_callback(86400.0, EDromo, edromo_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -478,8 +482,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = EDromo_burn(43200.0, deltaV, edromo_config)
-    end_callback = end_EDromo_integration(86400.0, edromo_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), EDromo, edromo_config
+    )
+    end_callback = build_termination_callback(86400.0, EDromo, edromo_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -543,8 +549,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = KS_burn(43200.0, deltaV, ks_config)
-    end_callback = end_KS_integration(86400.0, ks_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), KustaanheimoStiefel, ks_config
+    )
+    end_callback = build_termination_callback(86400.0, KustaanheimoStiefel, ks_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -600,8 +608,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = KS_burn(43200.0, deltaV, ks_config)
-    end_callback = end_KS_integration(86400.0, ks_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), KustaanheimoStiefel, ks_config
+    )
+    end_callback = build_termination_callback(86400.0, KustaanheimoStiefel, ks_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -661,8 +671,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = StiSche_burn(43200.0, deltaV, stische_config)
-    end_callback = end_StiSche_integration(86400.0, stische_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), StiefelScheifele, stische_config
+    )
+    end_callback = build_termination_callback(86400.0, StiefelScheifele, stische_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
@@ -724,8 +736,10 @@ end
 
     deltaV = [0.05; 0.01; 0.01]
 
-    burn_callback = StiSche_burn(43200.0, deltaV, stische_config)
-    end_callback = end_StiSche_integration(86400.0, stische_config)
+    burn_callback = build_maneuver_callback(
+        TimeTrigger(43200.0), FixedDeltaV(deltaV), StiefelScheifele, stische_config
+    )
+    end_callback = build_termination_callback(86400.0, StiefelScheifele, stische_config)
 
     callback_set = CallbackSet(burn_callback, end_callback)
 
