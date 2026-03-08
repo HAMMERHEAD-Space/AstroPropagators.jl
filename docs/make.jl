@@ -2,8 +2,10 @@ using Documenter
 using AstroPropagators
 using AstroMeasurements
 
+const _MeasExt = Base.get_extension(AstroPropagators, :AstroPropagatorsMeasurementsExt)
+
 makedocs(;
-    modules=[AstroPropagators],
+    modules=[AstroPropagators, _MeasExt],
     format=Documenter.HTML(;
         prettyurls=(!("local" in ARGS)), highlights=["yaml"], ansicolor=true
     ),
