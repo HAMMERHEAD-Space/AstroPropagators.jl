@@ -297,7 +297,7 @@ end
 function build_event_callback(
     condition, action::ContinueAction, ::Type{C}, args...
 ) where {C<:AstroCoords.AstroCoord}
-    return ContinuousCallback(condition, SciMLBase.nothing_affect!)
+    return ContinuousCallback(condition, (integrator) -> nothing)
 end
 
 function build_event_callback(

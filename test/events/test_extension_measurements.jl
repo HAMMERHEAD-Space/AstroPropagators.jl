@@ -69,7 +69,6 @@ using AstroMeasurements
 
         if length(passes) >= 2
             aos_events = filter(e -> e.event == :aos, passes)
-            los_events = filter(e -> e.event == :los, passes)
             for ev in aos_events
                 state_at_event = sol(ev.t)
                 el = AstroMeasurements.compute_elevation(
