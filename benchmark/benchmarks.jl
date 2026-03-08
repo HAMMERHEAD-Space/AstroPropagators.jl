@@ -87,8 +87,12 @@ const _config_pt_kep = RegularizedCoordinateConfig(
 )
 const _ϕ_kep = AstroCoords.compute_initial_phi(_state_cart, _μ_kep, _config_pt_kep)
 
-const _state_edromo_kep = Array(EDromo(Cartesian(_state_cart), _μ_kep, _ϕ_kep, _config_pt_kep))
-const _state_ks_kep = Array(KustaanheimoStiefel(Cartesian(_state_cart), _μ_kep, _config_pt_kep))
+const _state_edromo_kep = Array(
+    EDromo(Cartesian(_state_cart), _μ_kep, _ϕ_kep, _config_pt_kep)
+)
+const _state_ks_kep = Array(
+    KustaanheimoStiefel(Cartesian(_state_cart), _μ_kep, _config_pt_kep)
+)
 const _state_stische_kep = Array(
     StiefelScheifele(Cartesian(_state_cart), _μ_kep, _ϕ_kep, _config_pt_kep)
 )
@@ -252,12 +256,7 @@ SUITE["propagation"]["EDromo"] = @benchmarkable propagate(
     $_config_pt_full,
 )
 SUITE["propagation"]["KS"] = @benchmarkable propagate(
-    KSPropagator(),
-    $_state_ks_full,
-    $_p_full,
-    $_dynamics_full,
-    $_tspan,
-    $_config_pt_full,
+    KSPropagator(), $_state_ks_full, $_p_full, $_dynamics_full, $_tspan, $_config_pt_full
 )
 SUITE["propagation"]["StiSche"] = @benchmarkable propagate(
     StiSchePropagator(),
