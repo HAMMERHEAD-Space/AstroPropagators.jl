@@ -64,5 +64,5 @@ end
 function shift_condition(
     condition, Δt::Number, ::Type{C}, config::RegularizedCoordinateConfig
 ) where {C<:AstroCoords.AstroCoord}
-    return (u, t, integrator) -> condition(u, t, integrator)
+    return (u, t, integrator) -> condition(u, t + Δt, integrator)
 end

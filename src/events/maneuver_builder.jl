@@ -207,11 +207,7 @@ end
 
 function _wrap_condition_with_count(condition, count::Integer)
     count == 1 && return condition
-    counter = Ref(0)
-    return (u, t, integrator) -> begin
-        g = condition(u, t, integrator)
-        return g
-    end
+    return condition
 end
 
 function _wrap_affect_with_count(affect!, count::Integer)
