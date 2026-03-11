@@ -99,6 +99,15 @@ end
         ),
     ) == 0
     @test length(
+        check_allocs(ModEq_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+    ) == 0
+    @test length(
+        check_allocs(
+            ModEq_EOM!,
+            (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
+        ),
+    ) == 0
+    @test length(
         check_allocs(
             Milankovich_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list))
         ),

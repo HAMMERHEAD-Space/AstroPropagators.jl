@@ -78,6 +78,7 @@ const _state_mil = Array(Milankovich(Cartesian(_state_cart), _μ_kep))
 const _state_usm7 = Array(USM7(Cartesian(_state_cart), _μ_kep))
 const _state_usm6 = Array(USM6(Cartesian(_state_cart), _μ_kep))
 const _state_usmem = Array(USMEM(Cartesian(_state_cart), _μ_kep))
+const _state_modeq = Array(ModEq(Cartesian(_state_cart), _μ_kep))
 
 # ---------------------
 # Regularized configs & states — Keplerian (W=0, no perturbation)
@@ -177,6 +178,14 @@ SUITE["eom"]["standard"]["USMEM (Full)"] = @benchmarkable USMEM_EOM(
     $_state_usmem, $_p_full, $_t, $_dynamics_full
 )
 
+# --- ModEq ---
+SUITE["eom"]["standard"]["ModEq (Keplerian)"] = @benchmarkable ModEq_EOM(
+    $_state_modeq, $_p_kep, $_t, $_dynamics_kep
+)
+SUITE["eom"]["standard"]["ModEq (Full)"] = @benchmarkable ModEq_EOM(
+    $_state_modeq, $_p_full, $_t, $_dynamics_full
+)
+
 # =====================
 # Regularized EOM benchmarks
 # =====================
@@ -225,6 +234,7 @@ const _u0_milankovich = Array(Milankovich(Cartesian(_state_cart), _μ_full))
 const _u0_usm7 = Array(USM7(Cartesian(_state_cart), _μ_full))
 const _u0_usm6 = Array(USM6(Cartesian(_state_cart), _μ_full))
 const _u0_usmem = Array(USMEM(Cartesian(_state_cart), _μ_full))
+const _u0_modeq = Array(ModEq(Cartesian(_state_cart), _μ_full))
 
 # --- Standard propagators ---
 SUITE["propagation"]["Cowell"] = @benchmarkable propagate(
@@ -244,6 +254,9 @@ SUITE["propagation"]["USM6"] = @benchmarkable propagate(
 )
 SUITE["propagation"]["USMEM"] = @benchmarkable propagate(
     USMEMPropagator(), $_u0_usmem, $_p_full, $_dynamics_full, $_tspan
+)
+SUITE["propagation"]["ModEq"] = @benchmarkable propagate(
+    ModifiedEquinoctialPropagator(), $_u0_modeq, $_p_full, $_dynamics_full, $_tspan
 )
 
 # --- Regularized propagators ---

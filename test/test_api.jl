@@ -12,6 +12,7 @@
             (USM7Propagator(), "USM7"),
             (USM6Propagator(), "USM6"),
             (USMEMPropagator(), "USMEM"),
+            (ModifiedEquinoctialPropagator(), "ModEq"),
         )
             @testset "$label" begin
                 u = if prop isa CowellPropagator
@@ -24,6 +25,8 @@
                     Array(USM7(Cartesian(u0), μ))
                 elseif prop isa USM6Propagator
                     Array(USM6(Cartesian(u0), μ))
+                elseif prop isa ModifiedEquinoctialPropagator
+                    Array(ModEq(Cartesian(u0), μ))
                 else
                     Array(USMEM(Cartesian(u0), μ))
                 end
@@ -118,6 +121,12 @@ end
         u0_usm = Array(USMEM(Cartesian(u0), μ))
         sol = propagate(USMEMPropagator(), u0_usm, p, model_list, tspan)
         @test Array(Cartesian(USMEM(sol.u[end]), μ)) ≈ ref rtol = 1e-3
+    end
+
+    @testset "ModifiedEquinoctialPropagator" begin
+        u0_meq = Array(ModEq(Cartesian(u0), μ))
+        sol = propagate(ModifiedEquinoctialPropagator(), u0_meq, p, model_list, tspan)
+        @test Array(Cartesian(ModEq(sol.u[end]), μ)) ≈ ref
     end
 
     @testset "kwargs forwarding" begin
@@ -241,6 +250,12 @@ end
         u0_usm = Array(USMEM(Cartesian(u0), μ))
         sol = propagate!(USMEMPropagator(), u0_usm, p, model_list, tspan)
         @test Array(Cartesian(USMEM(sol.u[end]), μ)) ≈ ref rtol = 1e-3
+    end
+
+    @testset "ModifiedEquinoctialPropagator" begin
+        u0_meq = Array(ModEq(Cartesian(u0), μ))
+        sol = propagate!(ModifiedEquinoctialPropagator(), u0_meq, p, model_list, tspan)
+        @test Array(Cartesian(ModEq(sol.u[end]), μ)) ≈ ref
     end
 end
 

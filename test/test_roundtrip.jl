@@ -56,6 +56,12 @@
         @test recovered ≈ u0 rtol=1e-10
     end
 
+    @testset "ModEq" begin
+        mid = run_modeq(u0, model_list, p, tspan)
+        recovered = negate_velocity(run_modeq(negate_velocity(mid), model_list, p, tspan))
+        @test recovered ≈ u0 rtol=1e-8
+    end
+
     @testset "EDromo PhysicalTime" begin
         mid = run_edromo(u0, model_list, μ, grav_model, duration)
         recovered = negate_velocity(
@@ -189,6 +195,12 @@ end
     @testset "GaussVE" begin
         mid = run_gaussve(u0, model_list, p, tspan_fwd)
         recovered = run_gaussve(mid, model_list, p, tspan_bwd)
+        @test recovered ≈ u0 rtol=1e-6
+    end
+
+    @testset "ModEq" begin
+        mid = run_modeq(u0, model_list, p, tspan_fwd)
+        recovered = run_modeq(mid, model_list, p, tspan_bwd)
         @test recovered ≈ u0 rtol=1e-6
     end
 end
