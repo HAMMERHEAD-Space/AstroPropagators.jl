@@ -137,6 +137,15 @@ function run_usmem(u0_cart, model_list, p, tspan; atol=1e-13, rtol=1e-13)
     return Array(Cartesian(USMEM(sol.u[end]), μ))
 end
 
+function run_modeq(u0_cart, model_list, p, tspan; atol=1e-13, rtol=1e-13)
+    μ = p.μ
+    u0_meq = Array(ModEq(Cartesian(u0_cart), μ))
+    EOM!(du, u, _p, t) = ModEq_EOM!(du, u, _p, t, model_list)
+    prob = ODEProblem(EOM!, u0_meq, tspan, p)
+    sol = solve(prob, Vern9(); abstol=atol, reltol=rtol)
+    return Array(Cartesian(ModEq(sol.u[end]), μ))
+end
+
 # ── Regularized propagator wrappers ───────────────────────────────────
 
 function _regularized_W(u0_cart, grav_model, μ)

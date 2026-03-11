@@ -11,6 +11,7 @@
     @test run_usm7(u0, model_list, p, tspan) ≈ ref rtol=1e-6
     @test run_usm6(u0, model_list, p, tspan) ≈ ref rtol=1e-6
     @test run_usmem(u0, model_list, p, tspan) ≈ ref rtol=1e-6
+    @test run_modeq(u0, model_list, p, tspan) ≈ ref rtol=1e-6
     @test run_edromo(u0, model_list, μ, grav_model, duration) ≈ ref rtol=1e-6
     @test run_edromo(u0, model_list, μ, grav_model, duration; flag_time=ConstantTime()) ≈
         ref rtol=1e-6
@@ -34,6 +35,7 @@ end
     @test run_usm7(u0, model_list, p, tspan) ≈ ref rtol=1e-3
     @test run_usm6(u0, model_list, p, tspan) ≈ ref rtol=1e-3
     @test run_usmem(u0, model_list, p, tspan) ≈ ref rtol=1e-3
+    @test run_modeq(u0, model_list, p, tspan) ≈ ref rtol=1e-2
     @test run_edromo(u0, model_list, μ, grav_model, duration) ≈ ref rtol=1e-3
     @test run_ks(u0, model_list, μ, grav_model, duration) ≈ ref rtol=1e-3
     @test run_stische(u0, model_list, μ, grav_model, duration) ≈ ref rtol=1e-3

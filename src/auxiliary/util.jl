@@ -1,3 +1,5 @@
+export inertial_to_RTN
+
 """
     skew_sym(x::AbstractVector) -> SMatrix{3,3}
 

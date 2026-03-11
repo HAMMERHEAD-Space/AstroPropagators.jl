@@ -24,6 +24,7 @@ makedocs(;
             "propagators/milankovich.md",
             "propagators/usm.md",
             "propagators/geqoe.md",
+            "propagators/modified_equinoctial.md",
         ],
         "Events" => Any[
             "events/index.md",

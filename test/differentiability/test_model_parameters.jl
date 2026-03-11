@@ -28,6 +28,7 @@ const _ϕ_ct = AstroCoords.compute_initial_phi(_state, _μ, _config_ct)
 const _ϕ_lt = AstroCoords.compute_initial_phi(_state, _μ, _config_lt)
 
 const _state_koe = Array(Keplerian(Cartesian(_state), _μ))
+const _state_modeq = Array(ModEq(Cartesian(_state), _μ))
 const _state_mil = Array(Milankovich(Cartesian(_state), _μ))
 const _state_usm7 = Array(USM7(Cartesian(_state), _μ))
 const _state_usm6 = Array(USM6(Cartesian(_state), _μ))

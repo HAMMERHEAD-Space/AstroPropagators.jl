@@ -24,6 +24,7 @@ include("propagators/Milankovich.jl")
 include("propagators/Stiefel-Scheifele.jl")
 include("propagators/USM.jl")
 include("propagators/GEqOE.jl")
+include("propagators/ModifiedEquinoctial.jl")
 
 # API (type hierarchy, EOM dispatch, propagate)
 include("api.jl")

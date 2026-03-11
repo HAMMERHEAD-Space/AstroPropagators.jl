@@ -9,6 +9,7 @@ export AbstractPropagator,
     GEqOEPropagator,
     KSPropagator,
     MilankovichPropagator,
+    ModifiedEquinoctialPropagator,
     StiSchePropagator,
     USM7Propagator,
     USM6Propagator,
@@ -28,6 +29,7 @@ struct MilankovichPropagator <: AbstractStandardPropagator end
 struct USM7Propagator <: AbstractStandardPropagator end
 struct USM6Propagator <: AbstractStandardPropagator end
 struct USMEMPropagator <: AbstractStandardPropagator end
+struct ModifiedEquinoctialPropagator <: AbstractStandardPropagator end
 
 struct EDromoPropagator <: AbstractRegularizedPropagator end
 struct KSPropagator <: AbstractRegularizedPropagator end
@@ -54,6 +56,9 @@ Dispatches to the underlying EOM function for the given propagator type
 @inline eom!(::USM7Propagator, du, u, p, t, models) = USM7_EOM!(du, u, p, t, models)
 @inline eom!(::USM6Propagator, du, u, p, t, models) = USM6_EOM!(du, u, p, t, models)
 @inline eom!(::USMEMPropagator, du, u, p, t, models) = USMEM_EOM!(du, u, p, t, models)
+@inline eom!(::ModifiedEquinoctialPropagator, du, u, p, t, models) = ModEq_EOM!(
+    du, u, p, t, models
+)
 
 @inline eom!(::EDromoPropagator, du, u, p, t, models, config) = EDromo_EOM!(
     du, u, p, t, models, config
@@ -86,6 +91,7 @@ Dispatches to the underlying EOM function for the given propagator type
 @inline eom(::USM7Propagator, u, p, t, models) = USM7_EOM(u, p, t, models)
 @inline eom(::USM6Propagator, u, p, t, models) = USM6_EOM(u, p, t, models)
 @inline eom(::USMEMPropagator, u, p, t, models) = USMEM_EOM(u, p, t, models)
+@inline eom(::ModifiedEquinoctialPropagator, u, p, t, models) = ModEq_EOM(u, p, t, models)
 
 @inline eom(::EDromoPropagator, u, p, t, models, config) = EDromo_EOM(
     u, p, t, models, config

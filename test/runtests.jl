@@ -29,6 +29,7 @@ include("test_helpers.jl")
     include("propagators/test_StiSche.jl")
     include("propagators/test_USM.jl")
     include("propagators/test_GEqOE.jl")
+    include("propagators/test_modifiedequinoctial.jl")
     include("events/test_impulsive_maneuvers.jl")
     include("events/test_event_detectors.jl")
     include("events/test_extension_measurements.jl")
@@ -99,6 +100,7 @@ if _DIFF_ENV ∉ ("false", "")
         include("differentiability/test_StiSche.jl")
         include("differentiability/test_USM.jl")
         include("differentiability/test_GEqOE.jl")
+        include("differentiability/test_modifiedequinoctial.jl")
     end
 else
     @info "Skipping differentiability tests (set ASTROPROPAGATORS_TEST_DIFF to enable)"
