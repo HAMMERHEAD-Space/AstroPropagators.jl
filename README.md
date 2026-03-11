@@ -13,6 +13,7 @@ This project implements several propagation methods using equations of motion fo
 
 - [x] Cowell
 - [x] Gauss Variational Equations
+- [x] ModEq Variational Equations
 - [x] EDromo
 - [x] Kustaanheimo-Stiefel
 - [x] Milankovich
@@ -22,6 +23,8 @@ This project implements several propagation methods using equations of motion fo
     - [x] USM6
     - [x] USMEM
 - [x] GEqOE
+
+For analytic propagators, see [SatelliteToolboxPropagators.jl](https://github.com/JuliaSpace/SatelliteToolboxPropagators.jl)
 
 ## Installation
 
