@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Maneuvers · AstroPropagators.jl</title><meta name="title" content="Maneuvers · AstroPropagators.jl"/><meta property="og:title" content="Maneuvers · AstroPropagators.jl"/><meta property="twitter:title" content="Maneuvers · AstroPropagators.jl"/><meta name="description" content="Documentation for AstroPropagators.jl."/><meta property="og:description" content="Documentation for AstroPropagators.jl."/><meta property="twitter:description" content="Documentation for AstroPropagators.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="AstroPropagators.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">AstroPropagators.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../man/usage/">Usage</a></li><li><span class="tocitem">Propagators</span><ul><li><a class="tocitem" href="../../propagators/">Propagation Methods</a></li><li><a class="tocitem" href="../../propagators/cowell/">Cowell Method</a></li><li><a class="tocitem" href="../../propagators/gauss_ve/">Gauss Variational Equations</a></li><li><a class="tocitem" href="../../propagators/edromo/">EDromo Method</a></li><li><a class="tocitem" href="../../propagators/kustaanheimo_stiefel/">Kustaanheimo-Stiefel Method</a></li><li><a class="tocitem" href="../../propagators/stiefel_scheifele/">Stiefel-Scheifele Method</a></li><li><a class="tocitem" href="../../propagators/milankovich/">Milankovich Elements</a></li><li><a class="tocitem" href="../../propagators/usm/">Unified State Model (USM)</a></li><li><a class="tocitem" href="../../propagators/geqoe/">Generalized Equinoctial Orbital Elements (GEqOE)</a></li><li><a class="tocitem" href="../../propagators/modified_equinoctial/">Modified Equinoctial Elements</a></li></ul></li><li><span class="tocitem">Events</span><ul><li><a class="tocitem" href="../">Event System</a></li><li><a class="tocitem" href="../orbital_detectors/">Orbital Detectors</a></li><li><a class="tocitem" href="../eclipse_detectors/">Eclipse Detectors</a></li><li><a class="tocitem" href="../geometric_detectors/">Geometric Detectors</a></li><li><a class="tocitem" href="../utility_detectors/">Utility Detectors</a></li><li class="is-active"><a class="tocitem" href>Maneuvers</a><ul class="internal"><li><a class="tocitem" href="#Architecture"><span>Architecture</span></a></li><li><a class="tocitem" href="#Triggers"><span>Triggers</span></a></li><li><a class="tocitem" href="#Effects"><span>Effects</span></a></li><li><a class="tocitem" href="#Building-Callbacks"><span>Building Callbacks</span></a></li><li><a class="tocitem" href="#Regularized-Coordinates"><span>Regularized Coordinates</span></a></li><li><a class="tocitem" href="#Thrust-Frames"><span>Thrust Frames</span></a></li><li><a class="tocitem" href="#Common-Workflows"><span>Common Workflows</span></a></li><li><a class="tocitem" href="#Low-Level:-impulsive_burn!"><span>Low-Level: <code>impulsive_burn!</code></span></a></li><li><a class="tocitem" href="#API-Reference"><span>API Reference</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../man/api/">API Reference</a></li><li><a class="tocitem" href="../../lib/library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Events</a></li><li class="is-active"><a href>Maneuvers</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Maneuvers</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/master/docs/src/events/maneuvers.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Maneuvers"><a class="docs-heading-anchor" href="#Maneuvers">Maneuvers</a><a id="Maneuvers-1"></a><a class="docs-heading-anchor-permalink" href="#Maneuvers" title="Permalink"></a></h1><p>The maneuver system decouples <em>when</em> a maneuver fires (triggers) from <em>what</em> happens (effects). This enables flexible composition of burn timing strategies with delta-V computation methods.</p><h2 id="Architecture"><a class="docs-heading-anchor" href="#Architecture">Architecture</a><a id="Architecture-1"></a><a class="docs-heading-anchor-permalink" href="#Architecture" title="Permalink"></a></h2><pre><code class="nohighlight hljs">┌────────────────┐     ┌──────────────────┐
+│    Triggers     │     │     Effects       │
+│                 │     │                   │
+│  TimeTrigger    │     │  FixedDeltaV      │
+│  EventTrigger   │     │  ComputedDeltaV   │
+└────────┬───────┘     └────────┬──────────┘
+         │                      │
+         └──────────┬───────────┘
+                    │
+           build_maneuver_callback
+                    │
+                    ▼
+            ContinuousCallback</code></pre><p>Alternatively, event conditions can be paired with generic actions (not just maneuvers):</p><pre><code class="nohighlight hljs">┌──────────────────┐     ┌──────────────────┐
+│  Any condition    │     │   Event Actions   │
+│  (from detectors) │     │                   │
+│                   │     │  TerminateAction   │
+│                   │     │  LogAction         │
+│                   │     │  ContinueAction    │
+│                   │     │  ManeuverAction     │
+└────────┬──────────┘     └────────┬──────────┘
+         │                         │
+         └──────────┬──────────────┘
+                    │
+            build_event_callback
+                    │
+                    ▼
+             ContinuousCallback</code></pre><h2 id="Triggers"><a class="docs-heading-anchor" href="#Triggers">Triggers</a><a id="Triggers-1"></a><a class="docs-heading-anchor-permalink" href="#Triggers" title="Permalink"></a></h2><h3 id="TimeTrigger"><a class="docs-heading-anchor" href="#TimeTrigger">TimeTrigger</a><a id="TimeTrigger-1"></a><a class="docs-heading-anchor-permalink" href="#TimeTrigger" title="Permalink"></a></h3><p>Fire at a specific physical time:</p><pre><code class="language-julia hljs">trigger = TimeTrigger(43200.0)  # 12 hours into propagation</code></pre><h3 id="EventTrigger"><a class="docs-heading-anchor" href="#EventTrigger">EventTrigger</a><a id="EventTrigger-1"></a><a class="docs-heading-anchor-permalink" href="#EventTrigger" title="Permalink"></a></h3><p>Fire when a condition function crosses zero:</p><pre><code class="language-julia hljs"># Fire at first periapsis
+trigger = EventTrigger(apside_condition(Cartesian))
+
+# Fire at 3rd periapsis
+trigger = EventTrigger(apside_condition(Cartesian), 3)
+
+# Fire at ascending node
+trigger = EventTrigger(node_condition(Cartesian))
+
+# Fire at specific true anomaly
+trigger = EventTrigger(true_anomaly_condition(Cartesian, π))</code></pre><h2 id="Effects"><a class="docs-heading-anchor" href="#Effects">Effects</a><a id="Effects-1"></a><a class="docs-heading-anchor-permalink" href="#Effects" title="Permalink"></a></h2><h3 id="FixedDeltaV"><a class="docs-heading-anchor" href="#FixedDeltaV">FixedDeltaV</a><a id="FixedDeltaV-1"></a><a class="docs-heading-anchor-permalink" href="#FixedDeltaV" title="Permalink"></a></h3><p>Apply a predetermined delta-V vector:</p><pre><code class="language-julia hljs"># Inertial frame (default)
+effect = FixedDeltaV([0.1, 0.0, 0.0])
+
+# RTN frame (radial-transverse-normal)
+effect = FixedDeltaV([0.1, 0.0, 0.0], RTNFrame())
+
+# VNB frame (velocity-normal-binormal)
+effect = FixedDeltaV([0.0, 0.0, 0.05], VNBFrame())</code></pre><h3 id="ComputedDeltaV"><a class="docs-heading-anchor" href="#ComputedDeltaV">ComputedDeltaV</a><a id="ComputedDeltaV-1"></a><a class="docs-heading-anchor-permalink" href="#ComputedDeltaV" title="Permalink"></a></h3><p>Compute delta-V at event time from the current state. The compute function receives the Cartesian state, physical time, and integrator parameters:</p><pre><code class="language-julia hljs"># Hohmann-like: compute tangential ΔV based on current state
+function hohmann_dv(cart_state, t_phys, p)
+    r = sqrt(cart_state[1]^2 + cart_state[2]^2 + cart_state[3]^2)
+    v = sqrt(cart_state[4]^2 + cart_state[5]^2 + cart_state[6]^2)
+    v_target = sqrt(p.μ * (2/r - 1/a_target))
+    return SVector(0.0, v_target - v, 0.0)  # tangential only
+end
+
+effect = ComputedDeltaV(hohmann_dv, RTNFrame())</code></pre><pre><code class="language-julia hljs"># State-dependent correction
+function station_keeping_dv(cart_state, t_phys, p)
+    # Compute required correction from current state
+    return SVector(Δvx, Δvy, Δvz)
+end
+
+effect = ComputedDeltaV(station_keeping_dv, InertialFrame())</code></pre><h2 id="Building-Callbacks"><a class="docs-heading-anchor" href="#Building-Callbacks">Building Callbacks</a><a id="Building-Callbacks-1"></a><a class="docs-heading-anchor-permalink" href="#Building-Callbacks" title="Permalink"></a></h2><h3 id="Single-Maneuver:-build_maneuver_callback"><a class="docs-heading-anchor" href="#Single-Maneuver:-build_maneuver_callback">Single Maneuver: <code>build_maneuver_callback</code></a><a id="Single-Maneuver:-build_maneuver_callback-1"></a><a class="docs-heading-anchor-permalink" href="#Single-Maneuver:-build_maneuver_callback" title="Permalink"></a></h3><p>Combines a trigger and effect into a <code>ContinuousCallback</code>:</p><pre><code class="language-julia hljs"># Time-triggered burn in RTN frame
+cb = build_maneuver_callback(
+    TimeTrigger(43200.0),
+    FixedDeltaV([0.1, 0.0, 0.0], RTNFrame()),
+    Cartesian,
+)
+
+sol = propagate(CowellPropagator(), u0_cart, p, models, tspan; callback=cb)</code></pre><pre><code class="language-julia hljs"># Burn at apoapsis (affect_neg! crossing of dot(r,v))
+cb = build_maneuver_callback(
+    EventTrigger(apside_condition(Cartesian)),
+    FixedDeltaV([0.0, 0.5, 0.0], RTNFrame()),
+    Cartesian,
+)</code></pre><pre><code class="language-julia hljs"># Computed ΔV at 3rd periapsis
+cb = build_maneuver_callback(
+    EventTrigger(apside_condition(Cartesian), 3),
+    ComputedDeltaV(my_dv_func, RTNFrame()),
+    Cartesian,
+)</code></pre><h3 id="Multiple-Burns:-build_maneuver_schedule"><a class="docs-heading-anchor" href="#Multiple-Burns:-build_maneuver_schedule">Multiple Burns: <code>build_maneuver_schedule</code></a><a id="Multiple-Burns:-build_maneuver_schedule-1"></a><a class="docs-heading-anchor-permalink" href="#Multiple-Burns:-build_maneuver_schedule" title="Permalink"></a></h3><p>Combines a vector of <code>(trigger, effect)</code> pairs into a <code>CallbackSet</code>:</p><pre><code class="language-julia hljs">burns = [
+    (TimeTrigger(3600.0),  FixedDeltaV([0.1, 0.0, 0.0], RTNFrame())),
+    (TimeTrigger(7200.0),  FixedDeltaV([0.0, 0.05, 0.0], RTNFrame())),
+    (TimeTrigger(10800.0), FixedDeltaV([-0.05, 0.0, 0.0], RTNFrame())),
+]
+
+cbs = build_maneuver_schedule(burns, Cartesian)
+sol = propagate(CowellPropagator(), u0_cart, p, models, tspan; callback=cbs)</code></pre><h3 id="Generic-Events:-build_event_callback"><a class="docs-heading-anchor" href="#Generic-Events:-build_event_callback">Generic Events: <code>build_event_callback</code></a><a id="Generic-Events:-build_event_callback-1"></a><a class="docs-heading-anchor-permalink" href="#Generic-Events:-build_event_callback" title="Permalink"></a></h3><p>Pairs any condition function with an action:</p><pre><code class="language-julia hljs"># Terminate at first eclipse entry
+cond = eclipse_condition(Cartesian, Conical(), sun_model)
+cb = build_event_callback(cond, TerminateAction(), Cartesian)</code></pre><pre><code class="language-julia hljs"># Log all periapsis crossings
+log = []
+cond = apside_condition(Cartesian)
+cb = build_event_callback(cond, LogAction(log), Cartesian)
+# log entries: [(t=..., state=Cartesian(...)), ...]</code></pre><pre><code class="language-julia hljs"># Apply a maneuver at eclipse exit
+cond = eclipse_condition(Cartesian, Conical(), sun_model)
+action = ManeuverAction(FixedDeltaV([0.01, 0.0, 0.0], RTNFrame()))
+cb = build_event_callback(cond, action, Cartesian)</code></pre><h3 id="Termination:-build_termination_callback"><a class="docs-heading-anchor" href="#Termination:-build_termination_callback">Termination: <code>build_termination_callback</code></a><a id="Termination:-build_termination_callback-1"></a><a class="docs-heading-anchor-permalink" href="#Termination:-build_termination_callback" title="Permalink"></a></h3><p>Shortcut for stopping integration at a physical time:</p><pre><code class="language-julia hljs"># Standard coordinates
+cb = build_termination_callback(86400.0, Cartesian)
+
+# Regularized coordinates (handles fictitious time automatically)
+cb = build_termination_callback(86400.0, EDromo, config)</code></pre><h2 id="Regularized-Coordinates"><a class="docs-heading-anchor" href="#Regularized-Coordinates">Regularized Coordinates</a><a id="Regularized-Coordinates-1"></a><a class="docs-heading-anchor-permalink" href="#Regularized-Coordinates" title="Permalink"></a></h2><p>All builders have overloads accepting a <code>RegularizedCoordinateConfig</code>. The config handles:</p><ul><li>Physical time extraction for <code>TimeTrigger</code></li><li>Coordinate conversion for applying burns</li><li>Time element reset after burn application</li></ul><pre><code class="language-julia hljs">config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
+
+# Time-triggered burn with EDromo
+cb = build_maneuver_callback(
+    TimeTrigger(43200.0),
+    FixedDeltaV([0.1, 0.0, 0.0], RTNFrame()),
+    EDromo,
+    config,
+)
+
+# Event-triggered burn with EDromo
+cb = build_maneuver_callback(
+    EventTrigger(apside_condition(EDromo, config)),
+    FixedDeltaV([0.1, 0.0, 0.0], RTNFrame()),
+    EDromo,
+    config,
+)
+
+# Maneuver schedule with KS
+burns = [
+    (TimeTrigger(3600.0), FixedDeltaV([0.1, 0.0, 0.0])),
+    (TimeTrigger(7200.0), FixedDeltaV([0.0, 0.05, 0.0])),
+]
+cbs = build_maneuver_schedule(burns, KustaanheimoStiefel, config)</code></pre><h2 id="Thrust-Frames"><a class="docs-heading-anchor" href="#Thrust-Frames">Thrust Frames</a><a id="Thrust-Frames-1"></a><a class="docs-heading-anchor-permalink" href="#Thrust-Frames" title="Permalink"></a></h2><p>Delta-V vectors are specified in a thrust frame, then rotated to inertial for application via <code>AstroForceModels.transform_to_inertial</code>:</p><table><tr><th style="text-align: right">Frame</th><th style="text-align: right">Components</th><th style="text-align: right">Description</th></tr><tr><td style="text-align: right"><code>InertialFrame()</code></td><td style="text-align: right"><code>[Δvx, Δvy, Δvz]</code></td><td style="text-align: right">ECI inertial — no rotation</td></tr><tr><td style="text-align: right"><code>RTNFrame()</code></td><td style="text-align: right"><code>[ΔvR, ΔvT, ΔvN]</code></td><td style="text-align: right">Radial, Transverse, Normal</td></tr><tr><td style="text-align: right"><code>VNBFrame()</code></td><td style="text-align: right"><code>[ΔvV, ΔvN, ΔvB]</code></td><td style="text-align: right">Velocity, Normal, Binormal</td></tr></table><h2 id="Common-Workflows"><a class="docs-heading-anchor" href="#Common-Workflows">Common Workflows</a><a id="Common-Workflows-1"></a><a class="docs-heading-anchor-permalink" href="#Common-Workflows" title="Permalink"></a></h2><h3 id="Hohmann-Transfer"><a class="docs-heading-anchor" href="#Hohmann-Transfer">Hohmann Transfer</a><a id="Hohmann-Transfer-1"></a><a class="docs-heading-anchor-permalink" href="#Hohmann-Transfer" title="Permalink"></a></h3><pre><code class="language-julia hljs"># Burn 1: prograde at periapsis → raise apoapsis
+cb1 = build_maneuver_callback(
+    EventTrigger(apside_condition(Cartesian)),      # periapsis
+    FixedDeltaV([0.0, Δv1, 0.0], RTNFrame()),      # prograde
+    Cartesian,
+)
+
+# Burn 2: prograde at new apoapsis → circularize
+cb2 = build_maneuver_callback(
+    EventTrigger(apside_condition(Cartesian), 2),   # next apoapsis (2nd apside)
+    FixedDeltaV([0.0, Δv2, 0.0], RTNFrame()),      # prograde
+    Cartesian,
+)
+
+sol = propagate(CowellPropagator(), u0_cart, p, models, tspan;
+    callback=CallbackSet(cb1, cb2),
+)</code></pre><h3 id="Plane-Change-at-Node"><a class="docs-heading-anchor" href="#Plane-Change-at-Node">Plane Change at Node</a><a id="Plane-Change-at-Node-1"></a><a class="docs-heading-anchor-permalink" href="#Plane-Change-at-Node" title="Permalink"></a></h3><pre><code class="language-julia hljs">cb = build_maneuver_callback(
+    EventTrigger(node_condition(Cartesian)),         # ascending node
+    FixedDeltaV([0.0, 0.0, Δv_normal], RTNFrame()), # normal component
+    Cartesian,
+)</code></pre><h3 id="Station-Keeping-with-Computed-Burns"><a class="docs-heading-anchor" href="#Station-Keeping-with-Computed-Burns">Station-Keeping with Computed Burns</a><a id="Station-Keeping-with-Computed-Burns-1"></a><a class="docs-heading-anchor-permalink" href="#Station-Keeping-with-Computed-Burns" title="Permalink"></a></h3><pre><code class="language-julia hljs">function sk_correction(cart, t_phys, p)
+    kep = Keplerian(Cartesian(cart), p.μ)
+    Δa = a_target - kep.a
+    Δv = Δa * p.μ / (2 * kep.a^2 * sqrt(p.μ / kep.a))
+    return SVector(0.0, Δv, 0.0)
+end
+
+# Correct at every periapsis
+cb = build_maneuver_callback(
+    EventTrigger(apside_condition(Cartesian)),
+    ComputedDeltaV(sk_correction, RTNFrame()),
+    Cartesian,
+)</code></pre><h2 id="Low-Level:-impulsive_burn!"><a class="docs-heading-anchor" href="#Low-Level:-impulsive_burn!">Low-Level: <code>impulsive_burn!</code></a><a id="Low-Level:-impulsive_burn!-1"></a><a class="docs-heading-anchor-permalink" href="#Low-Level:-impulsive_burn!" title="Permalink"></a></h2><p>For direct integrator manipulation (e.g., inside custom callbacks), <code>impulsive_burn!</code> applies a delta-V without the trigger/effect abstraction:</p><pre><code class="language-julia hljs">using AstroPropagators: impulsive_burn!
+
+cb = ContinuousCallback(
+    my_condition,
+    (integrator) -&gt; impulsive_burn!(
+        integrator, [0.1, 0.0, 0.0];
+        coordinate_set=Cartesian, frame=RTNFrame(),
+    ),
+)</code></pre><h2 id="API-Reference"><a class="docs-heading-anchor" href="#API-Reference">API Reference</a><a id="API-Reference-1"></a><a class="docs-heading-anchor-permalink" href="#API-Reference" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="AstroPropagators.build_maneuver_callback"><a class="docstring-binding" href="#AstroPropagators.build_maneuver_callback"><code>AstroPropagators.build_maneuver_callback</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">build_maneuver_callback(trigger, effect, ::Type{C}) where {C&lt;:AstroCoord}
+build_maneuver_callback(trigger, effect, ::Type{C}, config) where {C&lt;:AstroCoord}</code></pre><p>Build a <code>ContinuousCallback</code> that fires a maneuver (trigger + effect) for the given coordinate type. Handles coordinate conversions and time-element updates automatically.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/9d2c1f01c74fac07336048663fa0bd766325ddbc/src/events/maneuver_builder.jl#L228-L235">source</a></section></details></article><article><details class="docstring" open="true"><summary id="AstroPropagators.build_maneuver_schedule"><a class="docstring-binding" href="#AstroPropagators.build_maneuver_schedule"><code>AstroPropagators.build_maneuver_schedule</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">build_maneuver_schedule(burns, ::Type{C}) where {C&lt;:AstroCoord}
+build_maneuver_schedule(burns, ::Type{C}, config) where {C&lt;:AstroCoord}</code></pre><p>Build a <code>CallbackSet</code> from a vector of <code>(trigger, effect)</code> pairs.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/9d2c1f01c74fac07336048663fa0bd766325ddbc/src/events/maneuver_builder.jl#L261-L266">source</a></section></details></article><article><details class="docstring" open="true"><summary id="AstroPropagators.build_event_callback"><a class="docstring-binding" href="#AstroPropagators.build_event_callback"><code>AstroPropagators.build_event_callback</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">build_event_callback(condition, action, ::Type{C}, [config])</code></pre><p>Build a <code>ContinuousCallback</code> pairing any event condition with an action (<code>TerminateAction</code>, <code>LogAction</code>, <code>ContinueAction</code>, <code>ManeuverAction</code>).</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/9d2c1f01c74fac07336048663fa0bd766325ddbc/src/events/maneuver_builder.jl#L281-L286">source</a></section></details></article><article><details class="docstring" open="true"><summary id="AstroPropagators.build_termination_callback"><a class="docstring-binding" href="#AstroPropagators.build_termination_callback"><code>AstroPropagators.build_termination_callback</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">build_termination_callback(stop_time, ::Type{C}) where {C&lt;:AstroCoord}
+build_termination_callback(stop_time, ::Type{C}, config) where {C&lt;:AstroCoord}</code></pre><p>Build a <code>ContinuousCallback</code> that terminates integration at <code>stop_time</code> [s].</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/9d2c1f01c74fac07336048663fa0bd766325ddbc/src/events/maneuver_builder.jl#L341-L346">source</a></section></details></article><article><details class="docstring" open="true"><summary id="AstroPropagators.impulsive_burn!"><a class="docstring-binding" href="#AstroPropagators.impulsive_burn!"><code>AstroPropagators.impulsive_burn!</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">impulsive_burn!(
+    integrator::SciMLBase.DEIntegrator,
+    ΔV::AbstractVector;
+    coordinate_set::AstroCoords.AstroCoord=Cartesian,
+    frame::AbstractThrustFrame=InertialFrame(),
+)</code></pre><p>Apply an instantaneous velocity change (impulsive burn) to the integrator state.</p><p>The <code>ΔV</code> vector is interpreted in the reference frame specified by <code>frame</code>:</p><ul><li><code>InertialFrame()</code>: <code>ΔV</code> components are inertial (ECI) — no rotation needed (default)</li><li><code>RTNFrame()</code>: <code>ΔV = [ΔV_R, ΔV_T, ΔV_N]</code> in the Radial–Transverse–Normal frame</li><li><code>VNBFrame()</code>: <code>ΔV = [ΔV_V, ΔV_N, ΔV_B]</code> in the Velocity–Normal–Binormal frame</li></ul><p><strong>Arguments</strong></p><ul><li><code>integrator::SciMLBase.DEIntegrator</code>: The differential equation integrator object.</li><li><code>ΔV::AbstractVector</code>: The 3-component delta-V of the impulsive burn [km/s].</li></ul><p><strong>Keyword Arguments</strong></p><ul><li><code>coordinate_set</code>: The coordinate set the propagation is using (default: <code>Cartesian</code>).</li><li><code>frame::AbstractThrustFrame</code>: Reference frame in which <code>ΔV</code> is expressed (default: <code>InertialFrame()</code>).</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/9d2c1f01c74fac07336048663fa0bd766325ddbc/src/events/impulsive_maneuvers.jl#L2-L25">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../utility_detectors/">« Utility Detectors</a><a class="docs-footer-nextpage" href="../../man/api/">API Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 13 March 2026 16:39">Friday 13 March 2026</span>. Using Julia version 1.10.11.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
