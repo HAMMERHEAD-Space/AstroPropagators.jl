@@ -45,13 +45,4 @@ include("events/maneuver_builder.jl")
 # Events — legacy impulsive burn (kept for low-level use)
 include("events/impulsive_maneuvers.jl")
 
-############################################################################################
-#                         Stub functions for package extensions
-############################################################################################
-export elevation_condition, relative_distance_condition, angular_separation_condition
-
-function elevation_condition end
-function relative_distance_condition end
-function angular_separation_condition end
-
 end

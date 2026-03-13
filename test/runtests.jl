@@ -2,7 +2,6 @@ using Test
 
 using AstroCoords
 using AstroForceModels
-using AstroMeasurements
 using AstroPropagators
 using ComponentArrays
 using LinearAlgebra
@@ -32,7 +31,6 @@ include("test_helpers.jl")
     include("propagators/test_modifiedequinoctial.jl")
     include("events/test_impulsive_maneuvers.jl")
     include("events/test_event_detectors.jl")
-    include("events/test_extension_measurements.jl")
     include("test_cross_formulation.jl")
     include("test_roundtrip.jl")
     include("test_api.jl")

@@ -43,7 +43,6 @@ Condition functions return a closure `(u, t, integrator) -> Float64` where zero-
 - **[Eclipse Detectors](eclipse_detectors.md)**: Shadow entry/exit using AstroForceModels shadow models
 - **[Geometric Detectors](geometric_detectors.md)**: Altitude, latitude, longitude, beta angle
 - **[Utility Detectors](utility_detectors.md)**: Date/time crossing, boolean composition, time shifting
-- **[Access/Visibility](access.md)**: Elevation, distance, angular separation (AstroMeasurements extension)
 
 ### Maneuver System
 
@@ -143,4 +142,4 @@ Most detectors only require `integrator.p.μ`. Some additionally require:
 | Parameter | Required By |
 |---|---|
 | `integrator.p.μ` | All detectors and maneuver builders |
-| `integrator.p.JD` | Eclipse, longitude, beta angle, access/visibility detectors |
+| `integrator.p.JD` | Eclipse, longitude, beta angle detectors |

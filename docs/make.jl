@@ -1,11 +1,8 @@
 using Documenter
 using AstroPropagators
-using AstroMeasurements
-
-const _MeasExt = Base.get_extension(AstroPropagators, :AstroPropagatorsMeasurementsExt)
 
 makedocs(;
-    modules=[AstroPropagators, _MeasExt],
+    modules=[AstroPropagators],
     format=Documenter.HTML(;
         prettyurls=(!("local" in ARGS)), highlights=["yaml"], ansicolor=true
     ),
@@ -33,7 +30,6 @@ makedocs(;
             "events/geometric_detectors.md",
             "events/utility_detectors.md",
             "events/maneuvers.md",
-            "events/access.md",
         ],
         "API Reference" => "man/api.md",
         "Library" => "lib/library.md",
