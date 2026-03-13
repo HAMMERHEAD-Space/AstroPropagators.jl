@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Kustaanheimo-Stiefel Method · AstroPropagators.jl</title><meta name="title" content="Kustaanheimo-Stiefel Method · AstroPropagators.jl"/><meta property="og:title" content="Kustaanheimo-Stiefel Method · AstroPropagators.jl"/><meta property="twitter:title" content="Kustaanheimo-Stiefel Method · AstroPropagators.jl"/><meta name="description" content="Documentation for AstroPropagators.jl."/><meta property="og:description" content="Documentation for AstroPropagators.jl."/><meta property="twitter:description" content="Documentation for AstroPropagators.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="AstroPropagators.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">AstroPropagators.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../man/usage/">Usage</a></li><li><span class="tocitem">Propagators</span><ul><li><a class="tocitem" href="../">Propagation Methods</a></li><li><a class="tocitem" href="../cowell/">Cowell Method</a></li><li><a class="tocitem" href="../gauss_ve/">Gauss Variational Equations</a></li><li><a class="tocitem" href="../edromo/">EDromo Method</a></li><li class="is-active"><a class="tocitem" href>Kustaanheimo-Stiefel Method</a><ul class="internal"><li><a class="tocitem" href="#Physical-Description"><span>Physical Description</span></a></li><li><a class="tocitem" href="#Key-Features"><span>Key Features</span></a></li><li><a class="tocitem" href="#Usage-Examples"><span>Usage Examples</span></a></li><li><a class="tocitem" href="#Applications"><span>Applications</span></a></li><li><a class="tocitem" href="#References"><span>References</span></a></li></ul></li><li><a class="tocitem" href="../stiefel_scheifele/">Stiefel-Scheifele Method</a></li><li><a class="tocitem" href="../milankovich/">Milankovich Elements</a></li><li><a class="tocitem" href="../usm/">Unified State Model (USM)</a></li><li><a class="tocitem" href="../geqoe/">Generalized Equinoctial Orbital Elements (GEqOE)</a></li><li><a class="tocitem" href="../modified_equinoctial/">Modified Equinoctial Elements</a></li></ul></li><li><span class="tocitem">Events</span><ul><li><a class="tocitem" href="../../events/">Event System</a></li><li><a class="tocitem" href="../../events/orbital_detectors/">Orbital Detectors</a></li><li><a class="tocitem" href="../../events/eclipse_detectors/">Eclipse Detectors</a></li><li><a class="tocitem" href="../../events/geometric_detectors/">Geometric Detectors</a></li><li><a class="tocitem" href="../../events/utility_detectors/">Utility Detectors</a></li><li><a class="tocitem" href="../../events/maneuvers/">Maneuvers</a></li><li><a class="tocitem" href="../../events/access/">Access / Visibility Events</a></li></ul></li><li><a class="tocitem" href="../../man/api/">API Reference</a></li><li><a class="tocitem" href="../../lib/library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Propagators</a></li><li class="is-active"><a href>Kustaanheimo-Stiefel Method</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Kustaanheimo-Stiefel Method</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/blob/master/docs/src/propagators/kustaanheimo_stiefel.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Kustaanheimo-Stiefel-Method"><a class="docs-heading-anchor" href="#Kustaanheimo-Stiefel-Method">Kustaanheimo-Stiefel Method</a><a id="Kustaanheimo-Stiefel-Method-1"></a><a class="docs-heading-anchor-permalink" href="#Kustaanheimo-Stiefel-Method" title="Permalink"></a></h1><p>The Kustaanheimo-Stiefel (K-S) method is a regularization technique that transforms the 3-dimensional two-body problem into a 4-dimensional harmonic oscillator. This method completely regularizes the equations of motion, making it ideal for numerical stability and long-term propagation.</p><h2 id="Physical-Description"><a class="docs-heading-anchor" href="#Physical-Description">Physical Description</a><a id="Physical-Description-1"></a><a class="docs-heading-anchor-permalink" href="#Physical-Description" title="Permalink"></a></h2><p>The K-S transformation uses four variables <code>[u₁, u₂, u₃, u₄]</code> to represent the three-dimensional position through the bilinear transformation:</p><pre><code class="nohighlight hljs">x = u₁² - u₂² - u₃² + u₄²
+y = 2(u₁u₂ - u₃u₄)  
+z = 2(u₁u₃ + u₂u₄)</code></pre><p>The method transforms the independent variable from physical time <code>t</code> to a fictitious time <code>s</code>, providing complete regularization.</p><h2 id="Key-Features"><a class="docs-heading-anchor" href="#Key-Features">Key Features</a><a id="Key-Features-1"></a><a class="docs-heading-anchor-permalink" href="#Key-Features" title="Permalink"></a></h2><ul><li><strong>Complete Regularization</strong>: Handles collision orbits and arbitrary eccentricity</li><li><strong>4D Harmonic Oscillator</strong>: Transforms Kepler problem to oscillator equation</li><li><strong>Quaternion Representation</strong>: Uses spinor-like 4D variables</li><li><strong>Linear Time Element</strong>: Provides uniform integration properties</li></ul><h2 id="Usage-Examples"><a class="docs-heading-anchor" href="#Usage-Examples">Usage Examples</a><a id="Usage-Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Usage-Examples" title="Permalink"></a></h2><div class="admonition is-info" id="Fictitious-time-e8a949e0b1949bf5"><header class="admonition-header">Fictitious time<a class="admonition-anchor" href="#Fictitious-time-e8a949e0b1949bf5" title="Permalink"></a></header><div class="admonition-body"><p>K-S integrates in a fictitious time variable <code>s</code>, not physical time <code>t</code>. The <code>tspan</code> argument is therefore the range of <code>s</code>, and a <code>ContinuousCallback</code> (via <code>end_KS_integration</code>) terminates the integration when the desired physical time is reached.</p></div></div><h3 id="Keplerian-Propagation"><a class="docs-heading-anchor" href="#Keplerian-Propagation">Keplerian Propagation</a><a id="Keplerian-Propagation-1"></a><a class="docs-heading-anchor-permalink" href="#Keplerian-Propagation" title="Permalink"></a></h3><pre><code class="language-julia hljs">using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxTransformations
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = KeplerianGravityAstroModel()
+μ = grav_model.μ
+p = ComponentVector(; JD=JD, μ=μ)
+models = CentralBodyDynamicsModel(grav_model)
+
+W = (
+    potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+)
+config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
+
+u0 = Array(KustaanheimoStiefel(Cartesian(u0_cart), μ, config))
+tspan = (0.0, 9π)
+
+sol = propagate(
+    KSPropagator(), u0, p, models, tspan, config;
+    callback=end_KS_integration(86400.0, config),
+)</code></pre><h3 id="High-Fidelity-Propagation"><a class="docs-heading-anchor" href="#High-Fidelity-Propagation">High-Fidelity Propagation</a><a id="High-Fidelity-Propagation-1"></a><a class="docs-heading-anchor-permalink" href="#High-Fidelity-Propagation" title="Permalink"></a></h3><pre><code class="language-julia hljs">using AstroPropagators, AstroForceModels, AstroCoords, ComponentArrays
+using SatelliteToolboxGravityModels, SatelliteToolboxTransformations, SpaceIndices
+
+SpaceIndices.init()
+eop_data = fetch_iers_eop()
+grav_coeffs = GravityModels.load(IcgemFile, fetch_icgem_file(:EGM96))
+
+u0_cart = [-1076.225324679696, -6765.896364327722, -332.3087833503755,
+            9.356857417032581, -3.3123476319597557, -1.1880157328553503]
+
+JD = date_to_jd(2024, 1, 5, 12, 0, 0.0)
+grav_model = GravityHarmonicsAstroModel(;
+    gravity_model=grav_coeffs, eop_data=eop_data, order=36, degree=36,
+)
+μ = GravityModels.gravity_constant(grav_model.gravity_model) / 1E9
+p = ComponentVector(; JD=JD, μ=μ)
+
+sun_model = ThirdBodyModel(; body=SunBody(), eop_data=eop_data)
+moon_model = ThirdBodyModel(; body=MoonBody(), eop_data=eop_data)
+srp_model = SRPAstroModel(;
+    satellite_srp_model=CannonballFixedSRP(0.2),
+    sun_data=sun_model, eop_data=eop_data, shadow_model=Conical(),
+)
+drag_model = DragAstroModel(;
+    satellite_drag_model=CannonballFixedDrag(0.2),
+    atmosphere_model=JB2008(), eop_data=eop_data,
+)
+
+models = CentralBodyDynamicsModel(
+    grav_model, (sun_model, moon_model, srp_model, drag_model),
+)
+
+W = (
+    potential(Cartesian(u0_cart), p, 0.0, grav_model) -
+    potential(Cartesian(u0_cart), p, 0.0, KeplerianGravityAstroModel(; μ=μ))
+)
+config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
+
+u0 = Array(KustaanheimoStiefel(Cartesian(u0_cart), μ, config))
+tspan = (0.0, 9π)
+
+sol = propagate(
+    KSPropagator(), u0, p, models, tspan, config;
+    callback=end_KS_integration(86400.0, config),
+)</code></pre><h3 id="Using-ODEProblem-Directly"><a class="docs-heading-anchor" href="#Using-ODEProblem-Directly">Using <code>ODEProblem</code> Directly</a><a id="Using-ODEProblem-Directly-1"></a><a class="docs-heading-anchor-permalink" href="#Using-ODEProblem-Directly" title="Permalink"></a></h3><pre><code class="language-julia hljs">using OrdinaryDiffEqVerner, SciMLBase
+
+# Using the same force model and config setup from above...
+u0 = Array(KustaanheimoStiefel(Cartesian(u0_cart), μ, config))
+tspan = (0.0, 9π)
+
+# In-place (what propagate! uses internally)
+f!(du, u, p, t) = KS_EOM!(du, u, p, t, models, config)
+prob = ODEProblem(f!, u0, tspan, p)
+sol = solve(
+    prob, Vern9();
+    abstol=1e-13, reltol=1e-13,
+    callback=end_KS_integration(86400.0, config),
+)
+
+# Out-of-place (what propagate uses internally)
+f(u, p, t) = KS_EOM(u, p, t, models, config)
+prob = ODEProblem{false}(f, u0, tspan, p)
+sol = solve(
+    prob, Vern9();
+    abstol=1e-13, reltol=1e-13,
+    callback=end_KS_integration(86400.0, config),
+)</code></pre><h2 id="Applications"><a class="docs-heading-anchor" href="#Applications">Applications</a><a id="Applications-1"></a><a class="docs-heading-anchor-permalink" href="#Applications" title="Permalink"></a></h2><p>The K-S method excels for:</p><ul><li><strong>Collision orbits</strong>: Trajectories passing through the central body</li><li><strong>Extreme eccentricity</strong>: Orbits with e ≥ 1 (parabolic/hyperbolic)</li><li><strong>Close encounters</strong>: Very low perigee passages</li><li><strong>Numerical stability</strong>: When other methods fail due to singularities</li></ul><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><p>[1]: Kustaanheimo, P., and E. Stiefel. &quot;Perturbation theory of Kepler motion based on spinor regularization.&quot; Journal für die reine und angewandte Mathematik, 218, pp. 204-219, 1965. [2]: Stiefel, E. L., and G. Scheifele. &quot;Linear and Regular Celestial Mechanics.&quot; Springer-Verlag, 1971. [3]: Battin, Richard H. &quot;An Introduction to the Mathematics and Methods of Astrodynamics.&quot; AIAA, 1999. </p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../edromo/">« EDromo Method</a><a class="docs-footer-nextpage" href="../stiefel_scheifele/">Stiefel-Scheifele Method »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 13 March 2026 16:17">Friday 13 March 2026</span>. Using Julia version 1.10.11.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
