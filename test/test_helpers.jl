@@ -146,6 +146,17 @@ function run_modeq(u0_cart, model_list, p, tspan; atol=1e-13, rtol=1e-13)
     return Array(Cartesian(ModEq(sol.u[end]), μ))
 end
 
+function run_geqoe(u0_cart, model_list, p, grav_model, tspan; atol=1e-13, rtol=1e-13)
+    μ = p.μ
+    W = _regularized_W(u0_cart, grav_model, μ)
+    config = RegularizedCoordinateConfig(; W=W)
+    u0 = Array(GEqOE(Cartesian(u0_cart), μ, config))
+    EOM!(du, u, _p, t) = GEqOE_EOM!(du, u, _p, t, model_list, config)
+    prob = ODEProblem(EOM!, u0, tspan, p)
+    sol = solve(prob, Vern9(); abstol=atol, reltol=rtol)
+    return Array(Cartesian(GEqOE(sol.u[end]), μ, config))
+end
+
 # ── Regularized propagator wrappers ───────────────────────────────────
 
 function _regularized_W(u0_cart, grav_model, μ)

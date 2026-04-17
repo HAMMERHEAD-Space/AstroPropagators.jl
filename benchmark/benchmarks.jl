@@ -225,8 +225,32 @@ SUITE["eom"]["regularized"]["GEqOE (Full)"] = @benchmarkable GEqOE_EOM(
 # =====================
 # Propagation benchmarks (2-day, full force model)
 # Reuses _*_full regularized configs/states defined above.
+#
+# Note on integration spans: Cowell, GaussVE, Milankovich, USM*, ModEq, and GEqOE
+# use physical time as the independent variable, so `_tspan` below is in seconds.
+# EDromo, KS, and StiSche integrate in fictitious time ϕ, so they take a generous
+# ϕ-range and a physical-time termination callback (identical to the pattern used
+# by `test_helpers.jl::run_{edromo,ks,stische}`).
 # =====================
-const _tspan = (0.0, 2.0 * 86400.0)
+const _duration = 2.0 * 86400.0
+const _tspan = (0.0, _duration)
+
+# Generous fictitious-time upper bounds for regularized integrators; the physical-time
+# termination callback fires long before these are hit, but the solver still needs a
+# finite upper bound on the independent variable. EDromo and StiSche start at ϕ₀;
+# KS starts at 0.
+const _phi_range = 1.0e4
+const _phi_tspan_edromo = (_ϕ_full, _ϕ_full + _phi_range)
+const _phi_tspan_stische = (_ϕ_full, _ϕ_full + _phi_range)
+const _phi_tspan_ks = (0.0, _phi_range)
+
+const _term_cb_edromo = build_termination_callback(_duration, EDromo, _config_pt_full)
+const _term_cb_ks = build_termination_callback(
+    _duration, KustaanheimoStiefel, _config_pt_full
+)
+const _term_cb_stische = build_termination_callback(
+    _duration, StiefelScheifele, _config_pt_full
+)
 
 const _u0_cowell = copy(_state_cart)
 const _u0_gaussve = Array(Keplerian(Cartesian(_state_cart), _μ_full))
@@ -265,19 +289,27 @@ SUITE["propagation"]["EDromo"] = @benchmarkable propagate(
     $_state_edromo_full,
     $_p_full,
     $_dynamics_full,
-    $_tspan,
-    $_config_pt_full,
+    $_phi_tspan_edromo,
+    $_config_pt_full;
+    callback=($_term_cb_edromo),
 )
 SUITE["propagation"]["KS"] = @benchmarkable propagate(
-    KSPropagator(), $_state_ks_full, $_p_full, $_dynamics_full, $_tspan, $_config_pt_full
+    KSPropagator(),
+    $_state_ks_full,
+    $_p_full,
+    $_dynamics_full,
+    $_phi_tspan_ks,
+    $_config_pt_full;
+    callback=($_term_cb_ks),
 )
 SUITE["propagation"]["StiSche"] = @benchmarkable propagate(
     StiSchePropagator(),
     $_state_stische_full,
     $_p_full,
     $_dynamics_full,
-    $_tspan,
-    $_config_pt_full,
+    $_phi_tspan_stische,
+    $_config_pt_full;
+    callback=($_term_cb_stische),
 )
 SUITE["propagation"]["GEqOE"] = @benchmarkable propagate(
     GEqOEPropagator(),
