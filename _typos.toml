@@ -1,0 +1,7 @@
+[default.extend-words]
+# Author name (S. W. Shepperd — Unified State Model and quaternion work)
+Shepperd = "Shepperd"
+# NRLMSISE-derived atmospheric model names
+MSIS = "MSIS"
+# Mock/test type alias in test/test_performance.jl
+MIGE = "MIGE"
