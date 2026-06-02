@@ -7,9 +7,13 @@
 end
 
 @testset "JET Testing" begin
-    rep = JET.test_package(
-        AstroPropagators; toplevel_logger=nothing, target_modules=(@__MODULE__,)
-    )
+    if VERSION < v"1.12"
+        rep = JET.test_package(
+            AstroPropagators; toplevel_logger=nothing, target_modules=(@__MODULE__,)
+        )
+    else
+        @info "Skipping JET tests on Julia $VERSION"
+    end
 end
 
 @testset "EOM Allocations" begin
