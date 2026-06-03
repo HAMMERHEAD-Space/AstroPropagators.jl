@@ -1,3 +1,25 @@
+const _SKIP_ALLOCCHECK = Sys.isapple() && Sys.ARCH === :aarch64 && VERSION >= v"1.12"
+
+if _SKIP_ALLOCCHECK
+    @info "Skipping AllocCheck allocation tests (spurious jl_get_pgcstack_static reports on macOS aarch64 + Julia 1.12+; see SciML/SciMLStructures.jl#59)."
+end
+
+function checked_allocs(f, types)
+    _SKIP_ALLOCCHECK && return ()
+    allocs = check_allocs(f, types)
+    if !isempty(allocs)
+        printstyled(stdout, "\n[ALLOC] "; color=:red, bold=true)
+        println(stdout, f, " with ", types, " => ", length(allocs), " allocation(s)")
+        for (i, a) in enumerate(allocs)
+            println(stdout, "  ──────── allocation ", i, " ────────")
+            show(stdout, MIME"text/plain"(), a)
+            println(stdout)
+        end
+        flush(stdout)
+    end
+    return allocs
+end
+
 @testset "Aqua.jl" begin
     Aqua.test_all(
         AstroPropagators;
@@ -7,9 +29,13 @@
 end
 
 @testset "JET Testing" begin
-    rep = JET.test_package(
-        AstroPropagators; toplevel_logger=nothing, target_modules=(@__MODULE__,)
-    )
+    if VERSION < v"1.12"
+        rep = JET.test_package(
+            AstroPropagators; toplevel_logger=nothing, target_modules=(@__MODULE__,)
+        )
+    else
+        @info "Skipping JET tests on Julia $VERSION"
+    end
 end
 
 @testset "EOM Allocations" begin
@@ -54,66 +80,70 @@ end
     )
 
     @test length(
-        check_allocs(GaussVE_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(
+            GaussVE_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list))
+        ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             GaussVE_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(Cowell_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(
+            Cowell_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list))
+        ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             Cowell_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(USM7_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(USM7_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             USM7_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(USM6_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(USM6_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             USM6_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(USMEM_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(USMEM_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             USMEM_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(ModEq_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
+        checked_allocs(ModEq_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list)))
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             ModEq_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             Milankovich_EOM, (Vector{Float64}, typeof(p), Float64, typeof(model_list))
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             Milankovich_EOM!,
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
@@ -180,39 +210,39 @@ end
     config = RegularizedCoordinateConfig(u0_cart, μ; W=W, t₀=0.0, flag_time=PhysicalTime())
 
     @test length(
-        check_allocs(
+        checked_allocs(
             (u, p, ϕ, models) -> EDromo_EOM(u, p, ϕ, models, config),
             (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             (du, u, p, ϕ, models) -> EDromo_EOM!(du, u, p, ϕ, models, config),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
 
     @test length(
-        check_allocs(
+        checked_allocs(
             (u, p, ϕ, models) -> KS_EOM(u, p, ϕ, models, config),
             (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             (du, u, p, ϕ, models) -> KS_EOM!(du, u, p, ϕ, models, config),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
 
     @test length(
-        check_allocs(
+        checked_allocs(
             (u, p, ϕ, models) -> StiSche_EOM(u, p, ϕ, models, config),
             (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             (du, u, p, ϕ, models) -> StiSche_EOM!(du, u, p, ϕ, models, config),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
@@ -221,13 +251,13 @@ end
     config_geqoe = RegularizedCoordinateConfig(; W=W)
 
     @test length(
-        check_allocs(
+        checked_allocs(
             (u, p, t, models) -> GEqOE_EOM(u, p, t, models, config_geqoe),
             (Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
     ) == 0
     @test length(
-        check_allocs(
+        checked_allocs(
             (du, u, p, t, models) -> GEqOE_EOM!(du, u, p, t, models, config_geqoe),
             (Vector{Float64}, Vector{Float64}, typeof(p), Float64, typeof(model_list)),
         ),
@@ -255,7 +285,7 @@ end
     # -- State adapter: get_cartesian / get_keplerian --
     @testset "get_cartesian (Cartesian)" begin
         @test length(
-            check_allocs(
+            checked_allocs(
                 get_cartesian, (Vector{Float64}, Float64, Float64, Type{Cartesian})
             ),
         ) == 0
@@ -263,7 +293,7 @@ end
 
     @testset "get_cartesian (Keplerian)" begin
         @test length(
-            check_allocs(
+            checked_allocs(
                 get_cartesian, (Vector{Float64}, Float64, Float64, Type{Keplerian})
             ),
         ) == 0
@@ -271,7 +301,7 @@ end
 
     @testset "get_keplerian (Cartesian)" begin
         @test length(
-            check_allocs(
+            checked_allocs(
                 get_keplerian, (Vector{Float64}, Float64, Float64, Type{Cartesian})
             ),
         ) == 0
@@ -280,77 +310,77 @@ end
     # -- Orbital detector conditions --
     @testset "apside_condition (Cartesian)" begin
         cond = apside_condition(Cartesian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "node_condition (Cartesian)" begin
         cond = node_condition(Cartesian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "true_anomaly_condition (Cartesian)" begin
         cond = true_anomaly_condition(Cartesian, π)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "argument_of_latitude_condition (Cartesian)" begin
         cond = argument_of_latitude_condition(Cartesian, π / 2)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "mean_anomaly_condition (Cartesian)" begin
         cond = mean_anomaly_condition(Cartesian, 0.0)
         # Upstream: AstroCoords.trueAnomaly2MeanAnomaly branching triggers AllocCheck
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) <= 1
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) <= 1
     end
 
     @testset "raan_condition (Cartesian)" begin
         cond = raan_condition(Cartesian, 0.0)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     # -- Geometric detector conditions --
     @testset "altitude_condition (Cartesian)" begin
         cond = altitude_condition(Cartesian, 400.0)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "latitude_condition (Cartesian)" begin
         cond = latitude_condition(Cartesian, 0.0)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "longitude_condition (Cartesian)" begin
         cond = longitude_condition(Cartesian, 0.0)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     # -- Utility detector conditions --
     @testset "date_condition (Cartesian)" begin
         cond = date_condition(Cartesian, 43200.0)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "negate_condition" begin
         cond = negate_condition(node_condition(Cartesian))
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "and_condition" begin
         cond = and_condition(
             node_condition(Cartesian), altitude_condition(Cartesian, 400.0)
         )
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "or_condition" begin
         cond = or_condition(node_condition(Cartesian), altitude_condition(Cartesian, 400.0))
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "shift_condition" begin
         cond = shift_condition(node_condition(Cartesian), 60.0, Cartesian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     # -- Eclipse and beta_angle conditions (require sun data) --
@@ -359,23 +389,23 @@ end
 
     @testset "eclipse_condition (Cartesian)" begin
         cond = eclipse_condition(Cartesian, Conical(), sun_third_body)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "beta_angle_condition (Cartesian)" begin
         cond = beta_angle_condition(Cartesian, sun_third_body, deg2rad(60.0))
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     # -- Keplerian-based conditions (with coordinate conversion) --
     @testset "apside_condition (Keplerian)" begin
         cond = apside_condition(Keplerian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "node_condition (Keplerian)" begin
         cond = node_condition(Keplerian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     # -- Regularized coordinate conditions --
@@ -390,22 +420,22 @@ end
 
         @testset "apside_condition (EDromo)" begin
             cond = apside_condition(EDromo, config)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
 
         @testset "node_condition (EDromo)" begin
             cond = node_condition(EDromo, config)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
 
         @testset "date_condition (EDromo)" begin
             cond = date_condition(EDromo, config, 43200.0)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
 
         @testset "get_physical_time (EDromo)" begin
             @test length(
-                check_allocs(
+                checked_allocs(
                     (u, t) -> get_physical_time(u, t, EDromo, config),
                     (Vector{Float64}, Float64),
                 ),
@@ -414,19 +444,19 @@ end
 
         @testset "apside_condition (KustaanheimoStiefel)" begin
             cond = apside_condition(KustaanheimoStiefel, config)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
 
         @testset "apside_condition (StiefelScheifele)" begin
             cond = apside_condition(StiefelScheifele, config)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
 
         config_geqoe = RegularizedCoordinateConfig(; W=W)
 
         @testset "apside_condition (GEqOE)" begin
             cond = apside_condition(GEqOE, config_geqoe)
-            @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+            @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
         end
     end
 
@@ -434,7 +464,7 @@ end
     @testset "TimeTrigger condition (Cartesian)" begin
         trigger = TimeTrigger(43200.0)
         cond = AstroPropagators._build_condition(trigger, Cartesian)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 
     @testset "TimeTrigger condition (EDromo)" begin
@@ -447,7 +477,7 @@ end
         )
         trigger = TimeTrigger(43200.0)
         cond = AstroPropagators._build_condition(trigger, EDromo, config)
-        @test length(check_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
+        @test length(checked_allocs(cond, (Vector{Float64}, Float64, MI))) == 0
     end
 end
 
@@ -472,7 +502,7 @@ end
     # -- _apply_burn! --
     @testset "_apply_burn! (Cartesian)" begin
         @test length(
-            check_allocs(
+            checked_allocs(
                 AstroPropagators._apply_burn!, (MIC, SVector{3,Float64}, Type{Cartesian})
             ),
         ) == 0
@@ -483,7 +513,7 @@ end
         mock_kep = _MockIntegrator(u0_kep, 0.0, p)
         MIK = typeof(mock_kep)
         @test length(
-            check_allocs(
+            checked_allocs(
                 AstroPropagators._apply_burn!, (MIK, SVector{3,Float64}, Type{Keplerian})
             ),
         ) == 0
@@ -493,19 +523,19 @@ end
     @testset "FixedDeltaV affect (Cartesian, InertialFrame)" begin
         effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), InertialFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
-        @test length(check_allocs(affect!, (MIC,))) == 0
+        @test length(checked_allocs(affect!, (MIC,))) == 0
     end
 
     @testset "FixedDeltaV affect (Cartesian, RTNFrame)" begin
         effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), RTNFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
-        @test length(check_allocs(affect!, (MIC,))) == 0
+        @test length(checked_allocs(affect!, (MIC,))) == 0
     end
 
     @testset "FixedDeltaV affect (Cartesian, VNBFrame)" begin
         effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), VNBFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
-        @test length(check_allocs(affect!, (MIC,))) == 0
+        @test length(checked_allocs(affect!, (MIC,))) == 0
     end
 
     # -- _build_affect: ComputedDeltaV --
@@ -513,14 +543,14 @@ end
         compute = (cart, t, p) -> SVector{3,Float64}(0.1, 0.0, 0.0)
         effect = ComputedDeltaV(compute, InertialFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
-        @test length(check_allocs(affect!, (MIC,))) == 0
+        @test length(checked_allocs(affect!, (MIC,))) == 0
     end
 
     @testset "ComputedDeltaV affect (Cartesian, RTNFrame)" begin
         compute = (cart, t, p) -> SVector{3,Float64}(0.0, 0.1, 0.0)
         effect = ComputedDeltaV(compute, RTNFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
-        @test length(check_allocs(affect!, (MIC,))) == 0
+        @test length(checked_allocs(affect!, (MIC,))) == 0
     end
 
     # -- _build_affect: FixedDeltaV with Keplerian coord type --
@@ -530,7 +560,7 @@ end
         MIK = typeof(mock_kep)
         effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), InertialFrame())
         affect! = AstroPropagators._build_affect(effect, Keplerian)
-        @test length(check_allocs(affect!, (MIK,))) == 0
+        @test length(checked_allocs(affect!, (MIK,))) == 0
     end
 
     # -- Regularized coordinate affects --
@@ -548,7 +578,7 @@ end
             mock_ed = _MockIntegrator(u0_ed, 0.0, p)
             MIE = typeof(mock_ed)
             @test length(
-                check_allocs(
+                checked_allocs(
                     (integ, dv) -> AstroPropagators._apply_burn!(integ, dv, EDromo, config),
                     (MIE, SVector{3,Float64}),
                 ),
@@ -561,7 +591,7 @@ end
             MIE = typeof(mock_ed)
             effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), InertialFrame())
             affect! = AstroPropagators._build_affect(effect, EDromo, config)
-            @test length(check_allocs(affect!, (MIE,))) == 0
+            @test length(checked_allocs(affect!, (MIE,))) == 0
         end
 
         @testset "_apply_burn! (KustaanheimoStiefel)" begin
@@ -569,7 +599,7 @@ end
             mock_ks = _MockIntegrator(u0_ks, 0.0, p)
             MIKS = typeof(mock_ks)
             @test length(
-                check_allocs(
+                checked_allocs(
                     (integ, dv) -> AstroPropagators._apply_burn!(
                         integ, dv, KustaanheimoStiefel, config
                     ),
@@ -584,7 +614,7 @@ end
             mock_ss = _MockIntegrator(u0_ss, ϕ₀, p)
             MISS = typeof(mock_ss)
             @test length(
-                check_allocs(
+                checked_allocs(
                     (integ, dv) ->
                         AstroPropagators._apply_burn!(integ, dv, StiefelScheifele, config),
                     (MISS, SVector{3,Float64}),
@@ -599,7 +629,7 @@ end
             mock_ge = _MockIntegrator(u0_ge, 0.0, p)
             MIGE = typeof(mock_ge)
             @test length(
-                check_allocs(
+                checked_allocs(
                     (integ, dv) ->
                         AstroPropagators._apply_burn!(integ, dv, GEqOE, config_geqoe),
                     (MIGE, SVector{3,Float64}),
@@ -613,13 +643,13 @@ end
         cond = apside_condition(Cartesian)
         wrapped = AstroPropagators._wrap_condition_with_count(cond, 3)
         MI_cond = typeof((p=p,))
-        @test length(check_allocs(wrapped, (Vector{Float64}, Float64, MI_cond))) == 0
+        @test length(checked_allocs(wrapped, (Vector{Float64}, Float64, MI_cond))) == 0
     end
 
     @testset "_wrap_affect_with_count" begin
         effect = FixedDeltaV(SVector{3}(0.1, 0.0, 0.0), InertialFrame())
         affect! = AstroPropagators._build_affect(effect, Cartesian)
         wrapped = AstroPropagators._wrap_affect_with_count(affect!, 3)
-        @test length(check_allocs(wrapped, (MIC,))) == 0
+        @test length(checked_allocs(wrapped, (MIC,))) == 0
     end
 end

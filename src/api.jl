@@ -50,28 +50,22 @@ Dispatches to the underlying EOM function for the given propagator type
 """
 @inline eom!(::CowellPropagator, du, u, p, t, models) = Cowell_EOM!(du, u, p, t, models)
 @inline eom!(::GaussVEPropagator, du, u, p, t, models) = GaussVE_EOM!(du, u, p, t, models)
-@inline eom!(::MilankovichPropagator, du, u, p, t, models) = Milankovich_EOM!(
-    du, u, p, t, models
-)
+@inline eom!(::MilankovichPropagator, du, u, p, t, models) =
+    Milankovich_EOM!(du, u, p, t, models)
 @inline eom!(::USM7Propagator, du, u, p, t, models) = USM7_EOM!(du, u, p, t, models)
 @inline eom!(::USM6Propagator, du, u, p, t, models) = USM6_EOM!(du, u, p, t, models)
 @inline eom!(::USMEMPropagator, du, u, p, t, models) = USMEM_EOM!(du, u, p, t, models)
-@inline eom!(::ModifiedEquinoctialPropagator, du, u, p, t, models) = ModEq_EOM!(
-    du, u, p, t, models
-)
+@inline eom!(::ModifiedEquinoctialPropagator, du, u, p, t, models) =
+    ModEq_EOM!(du, u, p, t, models)
 
-@inline eom!(::EDromoPropagator, du, u, p, t, models, config) = EDromo_EOM!(
-    du, u, p, t, models, config
-)
-@inline eom!(::KSPropagator, du, u, p, t, models, config) = KS_EOM!(
-    du, u, p, t, models, config
-)
-@inline eom!(::StiSchePropagator, du, u, p, t, models, config) = StiSche_EOM!(
-    du, u, p, t, models, config
-)
-@inline eom!(::GEqOEPropagator, du, u, p, t, models, config) = GEqOE_EOM!(
-    du, u, p, t, models, config
-)
+@inline eom!(::EDromoPropagator, du, u, p, t, models, config) =
+    EDromo_EOM!(du, u, p, t, models, config)
+@inline eom!(::KSPropagator, du, u, p, t, models, config) =
+    KS_EOM!(du, u, p, t, models, config)
+@inline eom!(::StiSchePropagator, du, u, p, t, models, config) =
+    StiSche_EOM!(du, u, p, t, models, config)
+@inline eom!(::GEqOEPropagator, du, u, p, t, models, config) =
+    GEqOE_EOM!(du, u, p, t, models, config)
 
 # ========================================================================================
 # EOM Dispatch — Out-of-place (eom)
@@ -93,13 +87,11 @@ Dispatches to the underlying EOM function for the given propagator type
 @inline eom(::USMEMPropagator, u, p, t, models) = USMEM_EOM(u, p, t, models)
 @inline eom(::ModifiedEquinoctialPropagator, u, p, t, models) = ModEq_EOM(u, p, t, models)
 
-@inline eom(::EDromoPropagator, u, p, t, models, config) = EDromo_EOM(
-    u, p, t, models, config
-)
+@inline eom(::EDromoPropagator, u, p, t, models, config) =
+    EDromo_EOM(u, p, t, models, config)
 @inline eom(::KSPropagator, u, p, t, models, config) = KS_EOM(u, p, t, models, config)
-@inline eom(::StiSchePropagator, u, p, t, models, config) = StiSche_EOM(
-    u, p, t, models, config
-)
+@inline eom(::StiSchePropagator, u, p, t, models, config) =
+    StiSche_EOM(u, p, t, models, config)
 @inline eom(::GEqOEPropagator, u, p, t, models, config) = GEqOE_EOM(u, p, t, models, config)
 
 # ========================================================================================
