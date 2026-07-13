@@ -1,3 +1,5 @@
+# THIS IS NO LONGER MAINTAINED AS I HAVE DROPPED MY PHD WORK
+
 # AstroPropagators
 
 [![CI](https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/HAMMERHEAD-Space/AstroPropagators.jl/actions/workflows/CI.yml?query=branch%3Amaster)
